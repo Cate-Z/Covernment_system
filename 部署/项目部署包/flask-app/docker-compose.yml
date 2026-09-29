@@ -1,0 +1,38 @@
+version: '3.3'
+
+services:
+  mysql:
+    image: mysql:8.0.35
+    container_name: gov-portal-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: trae123
+      MYSQL_DATABASE: example_db
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: trae123
+    ports:
+      - "3308:3306"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - mysql_data:/var/lib/mysql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ptrae123"]
+      timeout: 20s
+      retries: 10
+
+  flask-app:
+    build: .
+    container_name: gov-portal-flask
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_USER: root
+      MYSQL_PASSWORD: trae123
+      MYSQL_DB: example_db
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mysql
+    restart: unless-stopped
+
+volumes:
+  mysql_data:

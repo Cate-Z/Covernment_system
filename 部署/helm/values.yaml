@@ -1,0 +1,36 @@
+replicaCount: 3
+
+image:
+  repository: myapp
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+service:
+  type: ClusterIP
+  port: 5000
+
+ingress:
+  enabled: true
+  hosts:
+    - host: myapp.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+resources:
+  limits:
+    cpu: "1"
+    memory: "512Mi"
+  requests:
+    cpu: "100m"
+    memory: "256Mi"
+
+env:
+  - name: MYSQL_HOST
+    value: mysql
+  - name: MYSQL_USER
+    value: root
+  - name: MYSQL_PASSWORD
+    value: trae123
+  - name: MYSQL_DB
+    value: example_db

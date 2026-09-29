@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>政务数字门户平台</title>
+    <style>
+        :root {
+            --primary: #1a3c6d; --primary-light: #2b5ea7; --accent: #d43030;
+            --bg: #f0f2f5; --card: #fff; --text: #2c3e50; --text-secondary: #7f8c8d;
+            --border: #e8ecf1; --shadow: 0 2px 12px rgba(0,0,0,0.06);
+            --shadow-hover: 0 8px 30px rgba(0,0,0,0.10); --radius: 12px;
+            --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
+            --topbar-bg: #fff; --table-stripe: #f8fafc;
+        }
+        [data-theme="dark"] {
+            --bg: #1a1d23; --card: #242730; --text: #e4e6eb; --text-secondary: #9ca3af;
+            --primary: #60a5fa; --primary-light: #93bbfd;
+            --border: #333840; --shadow: 0 2px 12px rgba(0,0,0,0.3);
+            --shadow-hover: 0 8px 30px rgba(0,0,0,0.4);
+            --topbar-bg: #242730; --table-stripe: #2a2d37;
+            --input-bg: #2a2d37; --input-bg-focus: #303540; --input-border: #444a55;
+            --modal-bg: #2a2d37; --hover-bg: #2a2d37;
+            --badge-blue-bg: #1a2740; --badge-green-bg: #1a3020; --badge-red-bg: #302020; --badge-orange-bg: #302518; --badge-gray-bg: #2a2a2a;
+            --stat-blue-bg: #1a2740; --stat-green-bg: #1a3020; --stat-orange-bg: #302518; --stat-purple-bg: #251a30; --stat-red-bg: #302020;
+            --announce-bg: #2d2a18; --announce-border: #4a4520;
+            --news-cat-bg: #1a2740; --news-cat-color: #60a5fa;
+            --login-card-bg: rgba(36,39,48,0.97); --login-input-bg: #1e2130; --login-input-border: #3a3f4b;
+            --detail-bg: #2a2d37; --reply-bg: #1a3020; --reply-border: #2a4a30;
+        }
+        [data-theme="dark"] .input,[data-theme="dark"] .select{background:var(--input-bg);border-color:var(--input-border);color:var(--text)}
+        [data-theme="dark"] .input:focus,[data-theme="dark"] .select:focus{background:var(--input-bg-focus)}
+        [data-theme="dark"] .modal{background:var(--modal-bg)}
+        [data-theme="dark"] .modal-header{border-bottom-color:var(--border)}
+        [data-theme="dark"] .modal-footer{border-top-color:var(--border)}
+        [data-theme="dark"] .form-group input,[data-theme="dark"] .form-group textarea,[data-theme="dark"] .form-group select{background:var(--input-bg);border-color:var(--input-border);color:var(--text)}
+        [data-theme="dark"] .form-group input:focus,[data-theme="dark"] .form-group textarea:focus,[data-theme="dark"] .form-group select:focus{background:var(--input-bg-focus)}
+        [data-theme="dark"] .login-card{background:var(--login-card-bg)}
+        [data-theme="dark"] .login-card .field input{background:var(--login-input-bg);border-color:var(--login-input-border);color:var(--text)}
+        [data-theme="dark"] .login-card .field input:focus{background:var(--login-input-bg)}
+        [data-theme="dark"] .btn-outline{background:var(--card);border-color:var(--input-border)}
+        [data-theme="dark"] .btn-outline:hover{border-color:var(--primary-light);color:var(--primary-light)}
+        [data-theme="dark"] .pager button{background:var(--card);border-color:var(--input-border);color:var(--text)}
+        [data-theme="dark"] table tbody td{border-bottom-color:var(--border)}
+        [data-theme="dark"] table tbody tr:hover{background:var(--hover-bg)}
+        [data-theme="dark"] .service-card{background:var(--card)}
+        [data-theme="dark"] .badge-blue{background:var(--badge-blue-bg)} [data-theme="dark"] .badge-green{background:var(--badge-green-bg)}
+        [data-theme="dark"] .badge-red{background:var(--badge-red-bg)} [data-theme="dark"] .badge-orange{background:var(--badge-orange-bg)}
+        [data-theme="dark"] .badge-gray{background:var(--badge-gray-bg)}
+        [data-theme="dark"] .stat-icon-box.blue{background:var(--stat-blue-bg)} [data-theme="dark"] .stat-icon-box.green{background:var(--stat-green-bg)}
+        [data-theme="dark"] .stat-icon-box.orange{background:var(--stat-orange-bg)} [data-theme="dark"] .stat-icon-box.purple{background:var(--stat-purple-bg)}
+        [data-theme="dark"] .stat-icon-box.red{background:var(--stat-red-bg)}
+        [data-theme="dark"] .announce-bar{background:var(--announce-bg);border-color:var(--announce-border)}
+        [data-theme="dark"] .announce-bar .announce-text{color:#c4a84a}
+        [data-theme="dark"] .news-item .news-cat{background:var(--news-cat-bg);color:var(--news-cat-color)}
+        [data-theme="dark"] .svc-card-mini:hover{background:var(--hover-bg)}
+        .qcard{border-radius:10px;border:1px solid var(--border);transition:all var(--transition);cursor:pointer;padding:14px 14px;display:flex;align-items:center;gap:14px;margin-bottom:10px}
+        .qcard:hover{border-color:var(--primary-light);background:var(--hover-bg)}
+        .qcard .svc-icon-sm{font-size:30px;flex-shrink:0}
+        .qcard .svc-name-sm{font-size:14px;font-weight:600}
+        .qcard .svc-desc-sm{font-size:12px;color:var(--text-secondary)}
+        [data-theme="dark"] .modal-close{background:var(--input-bg);color:var(--text-secondary)}
+        [data-theme="dark"] .modal-close:hover{background:#3a2020;color:#f87171}
+        [data-theme="dark"] .pie-chart::after{background:var(--card)}
+        [data-theme="dark"] .detail-row{border-bottom-color:var(--border)}
+        [data-theme="dark"] .timeline::before{background:var(--border)}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
+
+        /* ========== 登录页 ========== */
+        .login-wrapper{display:flex;justify-content:center;align-items:center;min-height:100vh;background:linear-gradient(135deg,#0f1a30,#1a3c6d 40%,#1e4d8c 70%,#15325c);position:relative;overflow:hidden}
+        .login-wrapper::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 30% 50%,rgba(255,255,255,0.03),transparent 60%),radial-gradient(circle at 70% 20%,rgba(212,48,48,0.06),transparent 50%);animation:bgFloat 20s ease-in-out infinite}
+        @keyframes bgFloat{0%,100%{transform:translate(0,0) rotate(0)}50%{transform:translate(2%,1%) rotate(1deg)}}
+        .login-card{position:relative;z-index:1;background:rgba(255,255,255,0.97);backdrop-filter:blur(20px);border-radius:20px;padding:48px 40px;width:420px;box-shadow:0 30px 80px rgba(0,0,0,0.35);animation:slideUp 0.6s cubic-bezier(0.4,0,0.2,1)}
+        @keyframes slideUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+        .login-card .emblem{text-align:center;margin-bottom:8px;font-size:56px}
+        .login-card h2{text-align:center;font-size:22px;font-weight:700;color:var(--primary);margin-bottom:6px;letter-spacing:2px}
+        .login-card .subtitle{text-align:center;font-size:13px;color:var(--text-secondary);margin-bottom:28px;letter-spacing:1px}
+        .login-card .field{margin-bottom:20px;position:relative}
+        .login-card .field .icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:18px;color:#b0b8c1;pointer-events:none}
+        .login-card .field input{width:100%;padding:14px 14px 14px 44px;border:2px solid #e0e5eb;border-radius:10px;font-size:15px;color:var(--text);background:#f8fafc;outline:none;transition:all var(--transition)}
+        .login-card .field input:focus{border-color:var(--primary-light);background:#fff;box-shadow:0 0 0 4px rgba(26,60,109,0.08)}
+        .login-card .field input:focus+.icon,.login-card .field input:focus~.icon{color:var(--primary)}
+        .login-card .btn-login{width:100%;padding:14px;background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;letter-spacing:2px;transition:all var(--transition);box-shadow:0 6px 20px rgba(26,60,109,0.3)}
+        .login-card .btn-login:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(26,60,109,0.45)}
+        .login-card .btn-login:active{transform:translateY(0)}
+        .login-card .error{background:#fff5f5;color:var(--accent);text-align:center;padding:10px;border-radius:8px;margin-bottom:16px;font-size:13px;display:none;border:1px solid #fecaca}
+        .login-card .error.show{display:block;animation:shake 0.4s ease}
+        @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+        .login-card .remember-row{display:flex;align-items:center;gap:8px;margin-bottom:20px;font-size:13px;color:var(--text-secondary);cursor:pointer}
+        .login-card .remember-row input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:var(--primary)}
+
+        /* ========== 管理员布局 ========== */
+        .app-shell{display:none;min-height:100vh}
+        .sidebar{position:fixed;top:0;left:0;bottom:0;width:240px;background:linear-gradient(180deg,#0f1f3d,#1a3c6d);z-index:100;overflow-y:auto;box-shadow:4px 0 20px rgba(0,0,0,0.15)}
+        .sidebar .brand{padding:28px 24px 20px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.08)}
+        .sidebar .brand .logo-icon{font-size:42px;display:block;margin-bottom:8px}
+        .sidebar .brand .name{font-size:16px;font-weight:700;color:#fff;letter-spacing:2px}
+        .sidebar .brand .name-sub{font-size:11px;color:rgba(255,255,255,0.5);letter-spacing:3px;margin-top:4px}
+        .sidebar .nav-item{display:flex;align-items:center;gap:12px;padding:13px 24px;margin:2px 12px;border-radius:10px;color:rgba(255,255,255,0.7);font-size:14px;cursor:pointer;transition:all var(--transition);border:none;background:none;width:calc(100% - 24px);text-align:left;font-family:inherit}
+        .sidebar .nav-item:hover{background:rgba(255,255,255,0.08);color:#fff}
+        .sidebar .nav-item.active{background:rgba(255,255,255,0.15);color:#fff;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,0.2)}
+        .sidebar .nav-divider{margin:12px 24px;border:none;border-top:1px solid rgba(255,255,255,0.08)}
+        .sidebar .nav-section-title{padding:8px 24px;font-size:11px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:2px}
+        .main-area{margin-left:240px;min-height:100vh}
+
+        /* ========== 用户布局（侧边栏与管理端一致） ========== */
+        .main-area-wide{margin-left:0;min-height:100vh}
+        .user-sidebar{position:fixed;top:0;left:0;bottom:0;width:240px;background:linear-gradient(180deg,#0f1f3d,#1a3c6d);z-index:100;overflow-y:auto;box-shadow:4px 0 20px rgba(0,0,0,0.15)}
+        .user-sidebar .ubrand{padding:28px 24px 20px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.08)}
+        .user-sidebar .ubrand .uavatar{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.2);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;margin:0 auto 10px}
+        .user-sidebar .ubrand .uname{font-size:16px;font-weight:700;color:#fff;letter-spacing:2px}
+        .user-sidebar .ubrand .urole{font-size:11px;color:rgba(255,255,255,0.5);margin-top:4px;letter-spacing:3px;text-transform:uppercase}
+        .user-sidebar .unav-item{display:flex;align-items:center;gap:12px;padding:13px 24px;margin:2px 12px;border-radius:10px;color:rgba(255,255,255,0.7);font-size:14px;cursor:pointer;transition:all var(--transition);border:none;background:none;width:calc(100% - 24px);text-align:left;font-family:inherit}
+        .user-sidebar .unav-item:hover{background:rgba(255,255,255,0.08);color:#fff}
+        .user-sidebar .unav-item.active{background:rgba(255,255,255,0.15);color:#fff;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,0.2)}
+        .user-sidebar .unav-divider{margin:12px 24px;border:none;border-top:1px solid rgba(255,255,255,0.08)}
+        .user-sidebar .unav-section-title{padding:8px 24px;font-size:11px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:2px}
+        .user-main-area{margin-left:240px;min-height:100vh}
+
+        .topbar{background:var(--topbar-bg);padding:0 28px;height:60px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,0.04);position:sticky;top:0;z-index:50}
+        .topbar .page-title{font-size:17px;font-weight:600;color:var(--text)}
+        .topbar .user-info{display:flex;align-items:center;gap:12px}
+        .topbar .user-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600}
+        .sidebar-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:140}
+
+        .content-area{padding:28px;max-width:1200px;margin:0 auto}
+        .content-area-wide{padding:28px}
+
+        /* ========== 面包屑 & Footer ========== */
+        .breadcrumb{padding:10px 28px;font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:6px;background:var(--topbar-bg);border-bottom:1px solid var(--border)}
+        .breadcrumb span{cursor:pointer;transition:color var(--transition)}
+        .breadcrumb span:hover{color:var(--primary-light)}
+        .breadcrumb .bc-sep{color:var(--text-secondary);opacity:0.4;cursor:default}
+        .app-footer{text-align:center;padding:16px 24px;font-size:11px;color:var(--text-secondary);border-top:1px solid var(--border);margin-top:40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+        .copy-hint{font-size:10px;color:var(--primary-light);opacity:0;transition:opacity 0.3s}
+        .copy-hint.show{opacity:1}
+
+        /* ========== 统计卡片 ========== */
+        .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin-bottom:28px}
+        .stat-card{background:var(--card);border-radius:var(--radius);padding:22px 24px;box-shadow:var(--shadow);display:flex;align-items:center;gap:16px;transition:all var(--transition);border:1px solid var(--border);position:relative;overflow:hidden;cursor:default}
+        .stat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-hover)}
+        .stat-card .stat-icon-box{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+        .stat-icon-box.blue{background:#eef4ff}.stat-icon-box.green{background:#e6f7ee}
+        .stat-icon-box.orange{background:#fff7ed}.stat-icon-box.purple{background:#f3f0ff}.stat-icon-box.red{background:#fef2f2}
+        .stat-card .stat-num{font-size:30px;font-weight:700;line-height:1.2}
+        .stat-card .stat-label{font-size:13px;color:var(--text-secondary);margin-top:2px}
+
+        /* ========== 面板 / 表格 / 按钮 ========== */
+        .panel{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:24px;overflow:hidden}
+        .panel-toolbar{padding:20px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;border-bottom:1px solid var(--border);background:var(--card)}
+        .panel-toolbar h2{font-size:17px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;margin:0}
+        .toolbar-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+        .badge-count{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;border-radius:10px;background:#dc2626;color:#fff;font-size:11px;font-weight:700;padding:0 6px;line-height:1;transition:all 0.3s ease}.badge-count.warning{background:#ea580c;animation:pulse 1.5s infinite}.badge-count.danger{background:#991b1b;animation:pulse 0.8s infinite}@keyframes pulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(220,38,38,0.4)}50%{transform:scale(1.1);box-shadow:0 0 0 6px rgba(220,38,38,0)}}
+        .timeline{position:relative;padding-left:28px}
+        .timeline::before{content:'';position:absolute;left:10px;top:0;bottom:0;width:2px;background:var(--border)}
+        .timeline-item{position:relative;padding:8px 0 16px}
+        .timeline-item::before{content:'';position:absolute;left:-22px;top:10px;width:10px;height:10px;border-radius:50%;background:var(--primary-light);border:2px solid var(--card);z-index:1}
+        .timeline-item .tl-time{font-size:11px;color:var(--text-secondary);margin-bottom:2px}
+        .timeline-item .tl-action{font-size:13px;font-weight:600;color:var(--text)}
+        .timeline-item .tl-detail{font-size:12px;color:var(--text-secondary)}
+        .refresh-btn,.theme-toggle,.logout-btn,.hamburger,.modal-close{width:34px;height:34px;border-radius:10px;border:none;background:transparent;color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--transition)}
+        .refresh-btn svg,.theme-toggle svg,.logout-btn svg,.hamburger svg,.modal-close svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform 0.5s cubic-bezier(0.4,0,0.2,1)}
+        .refresh-btn:hover,.theme-toggle:hover{background:var(--bg);color:var(--primary-light)}
+        .refresh-btn:hover svg{transform:rotate(270deg)}
+        .refresh-btn:active svg{transform:rotate(450deg)}
+        .theme-toggle .icon-sun{display:none}
+        [data-theme="dark"] .theme-toggle .icon-moon{display:none}
+        [data-theme="dark"] .theme-toggle .icon-sun{display:block}
+        .theme-toggle:hover{background:var(--bg);color:#f59e0b}
+        .theme-toggle:hover svg{transform:rotate(30deg)}
+        .logout-btn{font-size:13px;font-family:inherit;padding:7px 14px;width:auto;gap:6px;border-radius:8px}
+        .logout-btn:hover{background:#fee2e2;color:#dc2626}
+        .logout-btn svg{width:18px;height:18px}
+        .hamburger:hover{background:var(--bg);color:var(--text)}
+        .modal-close:hover{background:#fee2e2;color:#dc2626}
+        .modal-close:hover svg{transform:rotate(90deg)}
+        .hamburger{display:none}
+        .th-sort{cursor:pointer;user-select:none;position:relative;padding-right:18px!important}
+        .th-sort::after{content:'↕';position:absolute;right:4px;opacity:0.3;font-size:11px}
+        .th-sort.asc::after{content:'↑';opacity:1}
+        .th-sort.desc::after{content:'↓';opacity:1}
+        .btn{padding:9px 18px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all var(--transition);font-family:inherit;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+        .btn-blue{background:var(--primary);color:#fff}.btn-blue:hover{background:var(--primary-light);box-shadow:0 4px 12px rgba(26,60,109,0.3)}
+        .btn-green{background:#16a34a;color:#fff}.btn-green:hover{background:#15803d}
+        .btn-red{background:#dc2626;color:#fff}.btn-red:hover{background:#b91c1c}
+        .btn-gray{background:#6b7280;color:#fff}.btn-gray:hover{background:#4b5563}
+        .btn-outline{background:#fff;color:var(--text);border:1.5px solid #d1d5db}.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+        .btn-sm{padding:5px 12px;font-size:12px;border-radius:6px}
+        .input,.select{padding:10px 14px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;color:var(--text);background:#fff;transition:all var(--transition);font-family:inherit;outline:none}
+        .input:focus,.select:focus{border-color:var(--primary-light);box-shadow:0 0 0 3px rgba(26,60,109,0.06)}
+        .input{width:220px}
+        .table-wrap{overflow-x:auto}
+        table{width:100%;border-collapse:collapse}
+        table thead th{padding:14px 16px;text-align:left;font-weight:600;font-size:13px;color:var(--text-secondary);background:var(--table-stripe);border-bottom:2px solid var(--border);white-space:nowrap}
+        table tbody td{padding:13px 16px;font-size:13px;color:var(--text);border-bottom:1px solid #f1f5f9;vertical-align:middle}
+        table tbody tr{transition:background 0.15s ease}table tbody tr:hover{background:#f8fafc}
+        .badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600}
+        .badge-blue{background:#eff6ff;color:#2563eb}.badge-green{background:#f0fdf4;color:#16a34a}
+        .badge-red{background:#fef2f2;color:#dc2626}.badge-orange{background:#fff7ed;color:#ea580c}.badge-gray{background:#f3f4f6;color:#6b7280}
+        .action-btns{display:flex;gap:6px}
+        .pager{padding:18px 24px;display:flex;justify-content:center;align-items:center;gap:8px;border-top:1px solid var(--border)}
+        .pager button{padding:7px 16px;border:1px solid #d1d5db;border-radius:6px;background:#fff;color:var(--text);font-size:13px;cursor:pointer;transition:all var(--transition);font-family:inherit}
+        .pager button:hover:not(:disabled){border-color:var(--primary);color:var(--primary)}
+        .pager button:disabled{opacity:0.4;cursor:not-allowed}
+        .page-info{font-size:13px;color:var(--text-secondary);padding:0 8px}
+
+        /* ========== 服务卡片 / 首页 / 图表 ========== */
+        .services-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;padding:24px}
+        .service-card{background:#fff;border-radius:var(--radius);padding:28px 24px;text-align:center;border:1px solid var(--border);cursor:pointer;transition:all var(--transition)}
+        .service-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-hover);border-color:var(--primary-light)}
+        .service-card .svc-icon{font-size:44px;margin-bottom:14px}
+        .service-card .svc-name{font-size:15px;font-weight:700;margin-bottom:8px}
+        .service-card .svc-desc{font-size:13px;color:var(--text-secondary);line-height:1.5}
+        .svc-actions{margin-top:14px;display:flex;gap:8px;justify-content:center}
+        .home-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+        .home-grid-2col{display:grid;grid-template-columns:2fr 1fr;gap:24px}
+        .home-panel{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border)}
+        .home-panel-hd{padding:18px 24px;border-bottom:1px solid var(--border);font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
+        .home-panel-bd{padding:16px 24px}
+        .hero-banner{background:linear-gradient(135deg,var(--primary),var(--primary-light));border-radius:var(--radius);padding:48px 40px;color:#fff;margin-bottom:28px;box-shadow:0 10px 40px rgba(26,60,109,0.25)}
+
+        /* Banner 轮播 */
+        .banner{position:relative;border-radius:var(--radius);overflow:hidden;margin-bottom:28px;height:240px;background:#1a3c6d}
+        .banner-slides{display:flex;transition:transform 0.6s cubic-bezier(0.4,0,0.2,1);height:100%}
+        .banner-slide{min-width:100%;height:100%;background-size:cover;background-position:center;display:flex;align-items:flex-end;padding:32px 40px;position:relative}
+        .banner-slide::after{content:'';position:absolute;inset:0;background:linear-gradient(transparent 30%,rgba(0,0,0,0.7))}
+        .banner-slide .banner-info{position:relative;z-index:1;color:#fff}
+        .banner-slide .banner-title{font-size:24px;font-weight:700;margin-bottom:8px;text-shadow:0 2px 8px rgba(0,0,0,0.4)}
+        .banner-slide .banner-meta{font-size:12px;opacity:0.85}
+        .banner-dots{position:absolute;bottom:16px;right:40px;display:flex;gap:8px;z-index:2}
+        .banner-dots span{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.4);cursor:pointer;transition:all 0.3s}
+        .banner-dots span.active{background:#fff;width:24px;border-radius:4px}
+        .banner-prev,.banner-next{position:absolute;top:50%;transform:translateY(-50%);z-index:2;background:rgba(255,255,255,0.15);color:#fff;border:none;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:20px;transition:background 0.3s}
+        .banner-prev{left:16px}.banner-next{right:16px}
+        .banner-prev:hover,.banner-next:hover{background:rgba(255,255,255,0.3)}
+        .hero-banner h1{font-size:28px;margin-bottom:8px}.hero-banner p{font-size:15px;opacity:0.85}
+        .announce-bar{background:#fffbe6;border:1px solid #ffe58f;border-radius:8px;padding:12px 20px;margin-bottom:20px;display:flex;align-items:center;gap:10px;overflow:hidden}
+        .announce-bar .announce-icon{font-size:18px;flex-shrink:0}
+        .announce-bar .announce-text{white-space:nowrap;animation:marquee 20s linear infinite;font-size:13px;color:#8b6914}
+        @keyframes marquee{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
+        .news-item{padding:14px 0;border-bottom:1px solid #f1f5f9;cursor:pointer;transition:all 0.2s}
+        .news-item:last-child{border-bottom:none}.news-item:hover{padding-left:8px}
+        .news-item .news-cat{display:inline-block;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:600;margin-bottom:6px;background:#eff6ff;color:#2563eb}
+        .news-item .news-title{font-size:14px;font-weight:600;margin-bottom:4px}
+        .news-item .news-meta{font-size:12px;color:var(--text-secondary);display:flex;gap:16px}
+        .svc-card-mini{display:flex;align-items:center;gap:14px;padding:14px;border-radius:10px;border:1px solid var(--border);margin-bottom:10px;transition:all var(--transition);cursor:pointer}
+        .svc-card-mini:hover{border-color:var(--primary-light);background:#f8fafc}
+        .svc-card-mini .svc-icon-sm{font-size:30px;flex-shrink:0}
+        .svc-card-mini .svc-name-sm{font-size:14px;font-weight:600}.svc-card-mini .svc-desc-sm{font-size:12px;color:var(--text-secondary)}
+        .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px}
+        .chart-box{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border);padding:24px}
+        .chart-box h3{font-size:15px;font-weight:700;text-align:center;margin-bottom:16px}
+        .bar-chart{display:flex;align-items:flex-end;gap:12px;height:220px;justify-content:center}
+        .bar-item{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;max-width:80px}
+        .bar-fill{width:100%;border-radius:6px 6px 0 0;background:linear-gradient(180deg,var(--primary-light),var(--primary));transition:height 0.6s cubic-bezier(0.4,0,0.2,1);min-height:4px}
+        .bar-label{font-size:11px;color:var(--text-secondary);text-align:center}
+        .bar-value{font-size:12px;font-weight:700}
+        .pie-chart{width:180px;height:180px;border-radius:50%;margin:0 auto 16px;background:conic-gradient(#6366f1 0deg,#6366f1 calc(var(--active-deg,0)*1deg),#8b5cf6 calc(var(--active-deg,0)*1deg),#8b5cf6 180deg,#06b6d4 180deg,#06b6d4 360deg);position:relative}
+        .pie-chart::after{content:'';position:absolute;top:25%;left:25%;width:50%;height:50%;border-radius:50%;background:#fff}
+        .pie-legend{display:flex;justify-content:center;gap:24px}
+        .pie-legend span{font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:6px}
+        .pie-legend .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+
+        /* ========== 模态框 / Toast ========== */
+        .modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.45);justify-content:center;align-items:center;padding:20px}
+        .modal-overlay.show{display:flex;animation:fadeIn 0.2s ease}
+        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+        .modal{background:#fff;border-radius:16px;width:100%;max-width:560px;max-height:85vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,0.3);animation:modalPop 0.3s cubic-bezier(0.4,0,0.2,1)}
+        @keyframes modalPop{from{opacity:0;transform:scale(0.92) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+        .modal-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+        .modal-header h3{font-size:17px;font-weight:700;margin:0}
+        .modal-body{padding:24px}.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+        .form-group{margin-bottom:18px}.form-group label{display:block;margin-bottom:6px;font-size:13px;font-weight:600}
+        .form-group input,.form-group textarea,.form-group select{width:100%;padding:11px 14px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;font-family:inherit;outline:none;transition:all var(--transition)}
+        .form-group textarea{min-height:100px;resize:vertical}
+        .form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--primary-light);box-shadow:0 0 0 3px rgba(26,60,109,0.06)}
+        .detail-row{display:flex;padding:10px 0;border-bottom:1px solid #f1f5f9}
+        .detail-label{width:100px;font-weight:600;color:var(--text-secondary);font-size:13px;flex-shrink:0}
+        .detail-value{font-size:13px;color:var(--text);flex:1}
+        .toast-container{position:fixed;top:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:10px}
+        .toast{padding:14px 20px;border-radius:10px;color:#fff;font-size:14px;font-weight:500;box-shadow:0 10px 30px rgba(0,0,0,0.2);animation:toastIn 0.35s cubic-bezier(0.4,0,0.2,1);max-width:380px;display:flex;align-items:center;gap:10px}
+        @keyframes toastIn{from{opacity:0;transform:translateX(60px)}to{opacity:1;transform:translateX(0)}}
+        .toast.success{background:#16a34a}.toast.error{background:#dc2626}.toast.warning{background:#ea580c}
+        .loading-text{text-align:center;color:var(--text-secondary);padding:24px;font-size:13px}
+        .empty-text{text-align:center;color:#9ca3af;padding:40px;font-size:14px}
+        .blog-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:12px;cursor:pointer;transition:all .25s}
+        .blog-card:hover{box-shadow:0 4px 20px rgba(0,0,0,0.08);transform:translateY(-2px)}
+        .blog-card-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+        .blog-card-title{font-weight:700;font-size:15px;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:12px}
+        .blog-card-badges{display:flex;gap:6px;flex-shrink:0}
+        .blog-card-body{font-size:13px;color:var(--text-secondary);line-height:1.7;margin-bottom:10px}
+        .blog-card-ft{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--text-secondary)}
+
+        @media(max-width:900px){.home-grid,.home-grid-2col{grid-template-columns:1fr}.sidebar{width:200px}.main-area{margin-left:200px}.user-sidebar{width:200px}.user-main-area{margin-left:200px}.stats-row{grid-template-columns:repeat(2,1fr)}}
+        @media(max-width:640px){.sidebar,.user-sidebar{display:none}.main-area,.user-main-area{margin-left:0}.stats-row{grid-template-columns:1fr}.hamburger{display:flex}.sidebar.open,.user-sidebar.open{display:block;position:fixed;z-index:150;width:240px}.sidebar.open+.sidebar-backdrop,.user-sidebar.open+.sidebar-backdrop{display:block}}
+    </style>
+</head>
+<body>
+
+<!-- ============ 登录页 ============ -->
+<div class="login-wrapper" id="loginPage">
+    <div class="login-card">
+        <div class="emblem">🏛️</div>
+        <h2>政务数字门户平台</h2>
+        <p class="subtitle">GOVERNMENT DIGITAL PORTAL</p>
+        <div class="error" id="loginError">用户名或密码错误</div>
+        <div class="field">
+            <span class="icon">👤</span>
+            <input type="text" id="loginUsername" placeholder="请输入用户名" autocomplete="username">
+        </div>
+        <div class="field">
+            <span class="icon">🔒</span>
+            <input type="password" id="loginPassword" placeholder="请输入密码" autocomplete="current-password">
+        </div>
+        <label class="remember-row">
+            <input type="checkbox" id="rememberMe"> 记住我（下次自动登录）
+        </label>
+        <button class="btn-login" onclick="doLogin()">登 录 系 统</button>
+        <div style="text-align:center;margin-top:16px;font-size:12px;color:var(--text-secondary)">还没有账号？<a href="#" onclick="showRegisterModal()" style="color:var(--primary-light);text-decoration:none;font-weight:600">注册新账号</a></div>
+    </div>
+</div>
+
+<!-- ============ 管理员主应用 ============ -->
+<div class="app-shell" id="adminShell">
+    <div class="sidebar" id="sidebar">
+        <div class="brand">
+            <span class="logo-icon">🏛️</span>
+            <div class="name">政务数字门户</div>
+            <div class="name-sub">Digital Portal</div>
+        </div>
+        <button class="nav-item active" onclick="adminShow('home')" id="navHome">🏠 首页概览</button>
+        <hr class="nav-divider"><div class="nav-section-title">业务管理</div>
+        <button class="nav-item" onclick="adminShow('news')" id="navNews">📰 新闻管理</button>
+        <button class="nav-item" onclick="adminShow('services')" id="navServices">⚙️ 服务管理</button>
+        <button class="nav-item" onclick="adminShow('feedback')" id="navFeedback">💬 反馈管理 <span class="badge-count" id="pendingBadge" style="display:none">0</span></button>
+        <button class="nav-item" onclick="adminShow('blogs')" id="navBlogs">📝 博客管理</button>
+        <hr class="nav-divider"><div class="nav-section-title">系统管理</div>
+        <button class="nav-item" onclick="adminShow('users')" id="navUsers">👥 用户管理</button>
+        <button class="nav-item" onclick="adminShow('departments')" id="navDepartments">🏢 部门管理</button>
+        <button class="nav-item" onclick="adminShow('announcements')" id="navAnnouncements">📢 通知公告</button>
+        <button class="nav-item" onclick="adminShow('stats')" id="navStats">📊 数据统计</button>
+        <hr class="nav-divider"><div class="nav-section-title">运维管理</div>
+        <button class="nav-item" onclick="adminShow('logs')" id="navLogs">📝 操作日志</button>
+        <button class="nav-item" onclick="adminShow('monitor')" id="navMonitor">🖥️ 系统监控</button>
+        <button class="nav-item" onclick="adminShow('settings')" id="navSettings">⚙️ 系统设置</button>
+    </div>
+    <div class="main-area">
+        <div class="topbar">
+            <div style="display:flex;align-items:center;gap:12px">
+                <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')"><svg viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg></button>
+                <span class="page-title" id="adminPageTitle">🏠 首页概览</span>
+            </div>
+            <div class="user-info">
+                <button class="refresh-btn" onclick="globalRefresh()" title="刷新当前页面"><svg viewBox="0 0 24 24"><path d="M1 4v6h6"/><path d="M3.5 15a9 9 0 1 0 2.1-8.3L1 10"/></svg></button>
+                <button class="theme-toggle" onclick="toggleTheme()" title="切换深色/浅色模式" id="themeToggle">
+                    <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                    <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                </button>
+                <div class="user-avatar">管</div>
+                <span style="font-size:13px" id="adminDisplayName">管理员</span>
+                <button class="logout-btn" onclick="doLogout()"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg> 退出</button>
+            </div>
+        </div>
+        <div class="breadcrumb" id="adminBreadcrumb"><span onclick="adminShow('home')">🏠 首页</span><span class="bc-sep">/</span><span>概览</span></div>
+        <div class="content-area-wide" id="adminContent"><div class="loading-text">加载中...</div></div>
+        <div class="app-footer" id="adminFooter"></div>
+    </div>
+</div>
+<div class="sidebar-backdrop" onclick="document.getElementById('sidebar').classList.remove('open')"></div>
+
+<!-- ============ 用户主应用 ============ -->
+<div class="app-shell" id="userShell">
+    <div class="user-sidebar" id="userSidebar">
+        <div class="ubrand">
+            <div class="uavatar" id="uSideAvatar">用</div>
+            <div class="uname" id="uSideName">用户</div>
+            <div class="urole">普通用户</div>
+        </div>
+        <button class="unav-item active" onclick="userShow('home')" id="unavHome">🏠 首页门户</button>
+        <hr class="unav-divider">
+        <div class="unav-section-title">个人中心</div>
+        <button class="unav-item" onclick="userShow('blog')" id="unavBlog">📝 我的博客</button>
+        <button class="unav-item" onclick="userShow('friends')" id="unavFriends">👥 好友管理</button>
+        <button class="unav-item" onclick="userShow('feedback')" id="unavFeedback">📋 我的反馈</button>
+        <hr class="unav-divider">
+        <div class="unav-section-title">账户设置</div>
+        <button class="unav-item" onclick="userShow('profile')" id="unavProfile">👤 个人信息</button>
+        <button class="unav-item" onclick="userShow('password')" id="unavPassword">🔒 修改密码</button>
+    </div>
+    <div class="user-main-area">
+        <div class="topbar">
+            <div style="display:flex;align-items:center;gap:12px">
+                <button class="hamburger" onclick="document.getElementById('userSidebar').classList.toggle('open')"><svg viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg></button>
+                <span class="page-title" id="userPageTitle">🏠 首页门户</span>
+            </div>
+            <div class="user-info">
+                <button class="refresh-btn" onclick="globalRefresh()" title="刷新当前页面"><svg viewBox="0 0 24 24"><path d="M1 4v6h6"/><path d="M3.5 15a9 9 0 1 0 2.1-8.3L1 10"/></svg></button>
+                <button class="theme-toggle" onclick="toggleTheme()" title="切换深色/浅色模式">
+                    <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                    <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                </button>
+                <div class="user-avatar">用</div>
+                <span style="font-size:13px" id="userDisplayName">用户</span>
+                <button class="logout-btn" onclick="doLogout()"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg> 退出</button>
+            </div>
+        </div>
+        <div class="content-area" id="userContent"><div class="loading-text">加载中...</div></div>
+        <div class="app-footer" id="userFooter"></div>
+    </div>
+</div>
+
+<!-- ========== 通用模态框 ========== -->
+<div class="modal-overlay" id="genericModal">
+    <div class="modal">
+        <div class="modal-header"><h3 id="modalTitle">标题</h3><button class="modal-close" onclick="closeModal()"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+        <div class="modal-body" id="modalBody"></div>
+        <div class="modal-footer" id="modalFooter"></div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="feedbackDetailModal">
+    <div class="modal">
+        <div class="modal-header"><h3>💬 反馈详情</h3><button class="modal-close" onclick="closeModal('feedbackDetailModal')"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+        <div class="modal-body" id="feedbackDetailBody"></div>
+    </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+let currentPage=1,newsCurrentPage=1,feedbackCurrentPage=1,selectedUsers=new Set(),currentRole='',currentSection='',currentUserSection='';
+let debounceTimers={};
+
+function debounce(key, fn, delay=350){clearTimeout(debounceTimers[key]);debounceTimers[key]=setTimeout(fn,delay)}
+
+function showToast(m,t='success'){const c=document.getElementById('toastContainer'),d=document.createElement('div'),i={success:'✅',error:'❌',warning:'⚠️'};d.className='toast '+t;d.innerHTML=i[t]+' '+m;c.appendChild(d);setTimeout(()=>{d.style.opacity='0';d.style.transform='translateX(60px)';d.style.transition='0.3s ease';setTimeout(()=>d.remove(),300)},3000)}
+function closeModal(id=null){if(id){document.getElementById(id).classList.remove('show');return}document.getElementById('genericModal').classList.remove('show');document.getElementById('feedbackDetailModal').classList.remove('show')}
+
+// ==================== 登录 ====================
+async function doLogin(){
+    const u=document.getElementById('loginUsername').value,p=document.getElementById('loginPassword').value;
+    if(!u||!p){showToast('请输入用户名和密码','warning');return}
+    try{
+        const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
+        const d=await r.json();
+        if(d.success){
+            currentRole=d.role;
+            if(document.getElementById('rememberMe').checked){
+                localStorage.setItem('gov_portal_remember',JSON.stringify({username:u,password:p,role:d.role}));
+            }
+            document.getElementById('loginPage').style.display='none';
+            if(d.role==='admin'){
+                document.getElementById('adminShell').style.display='block';document.getElementById('adminDisplayName').textContent='管理员';
+                adminShow('home');
+            }else{
+                document.getElementById('userShell').style.display='block';document.getElementById('userDisplayName').textContent=d.name||u;
+                document.getElementById('uSideName').textContent=d.name||u;document.getElementById('uSideAvatar').textContent=(d.name||u).charAt(0);
+                loadUserPortal();
+            }
+            showToast(d.message||'登录成功','success');
+        }else{
+            const err=document.getElementById('loginError');err.classList.add('show');err.textContent=d.message||'用户名或密码错误';setTimeout(()=>err.classList.remove('show'),3000);
+        }
+    }catch(e){showToast('登录失败，请检查网络','error')}
+}
+
+async function doLogout(){
+    try{await fetch('/api/logout',{method:'POST'})}catch(e){}
+    localStorage.removeItem('gov_portal_remember');
+    document.getElementById('adminShell').style.display='none';document.getElementById('userShell').style.display='none';
+    document.getElementById('loginPage').style.display='flex';document.getElementById('loginUsername').value='';document.getElementById('loginPassword').value='';
+    showToast('已退出登录','success');
+}
+
+// 自动登录检测
+async function autoLogin(){
+    // 1. 先检查 session
+    try{
+        const r=await fetch('/api/check_auth');const d=await r.json();
+        if(d.authenticated){
+            currentRole=d.role;document.getElementById('loginPage').style.display='none';
+            if(d.role==='admin'){document.getElementById('adminShell').style.display='block';document.getElementById('adminDisplayName').textContent=d.name||'管理员';adminShow('home')}
+            else{document.getElementById('userShell').style.display='block';document.getElementById('userDisplayName').textContent=d.name||d.username;document.getElementById('uSideName').textContent=d.name||d.username;document.getElementById('uSideAvatar').textContent=(d.name||d.username).charAt(0);loadUserPortal()}
+            return;
+        }
+    }catch(e){}
+
+    // 2. 再检查 localStorage 记住我
+    const saved=localStorage.getItem('gov_portal_remember');
+    if(saved){
+        try{
+            const cred=JSON.parse(saved);
+            document.getElementById('loginUsername').value=cred.username;
+            document.getElementById('loginPassword').value=cred.password;
+            document.getElementById('rememberMe').checked=true;
+            await doLogin();
+            return;
+        }catch(e){localStorage.removeItem('gov_portal_remember')}
+    }
+    // 3. 显示登录页
+    document.getElementById('loginPage').style.display='flex';
+}
+
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementById('loginPage').style.display!=='none')doLogin();if(e.key==='Escape')closeModal();if(e.ctrlKey&&e.key==='Enter'&&document.getElementById('genericModal').classList.contains('show')){const fb=document.getElementById('modalFooter');if(fb){const btn=fb.querySelector('.btn-blue')||fb.querySelector('.btn-green');if(btn)btn.click()}}});
+document.addEventListener('DOMContentLoaded',autoLogin);
+
+// ==================== 暗色模式 ====================
+function toggleTheme(){
+    const html=document.documentElement,isDark=html.getAttribute('data-theme')==='dark';
+    html.setAttribute('data-theme',isDark?'':'dark');
+    localStorage.setItem('gov_theme',isDark?'':'dark');
+}
+(function(){
+    if(localStorage.getItem('gov_theme')==='dark'){document.documentElement.setAttribute('data-theme','dark')}
+})();
+
+// ==================== 全局刷新 ====================
+function globalRefresh(){
+    const svg=document.querySelector('.refresh-btn svg');
+    if(svg){svg.style.transform='rotate(360deg)';setTimeout(()=>svg.style.transform='',600)}
+    if(currentRole==='admin'){if(currentSection)adminShow(currentSection)}
+    else if(currentRole==='user'){if(currentUserSection)userShow(currentUserSection)}
+}
+
+// ==================== Footer & 工具 ====================
+function updateFooter(){
+    const footers=document.querySelectorAll('.app-footer');
+    footers.forEach(f=>{f.innerHTML=`<span>© 2026 政务数字门户平台 · 鲲鹏云计算实训项目</span><span>政务热线：12345</span>`});
+}
+
+function copyToClipboard(text){
+    if(!text||text==='-')return;
+    navigator.clipboard.writeText(text).then(()=>{
+        showToast('已复制: '+text,'success');
+    }).catch(()=>{showToast('复制失败','error')});
+}
+
+function renderBanner(containerId,news){
+    const el=document.getElementById(containerId);
+    if(!el||!news||news.length===0){if(el)el.style.display='none';return}
+    const slides=news.slice(0,5).map((n,i)=>`<div class="banner-slide" style="background-image:url(${n.image_url});background-color:#1a3c6d" onclick="adminViewNews(${n.id})" title="点击查看详情"><div class="banner-info"><div class="banner-title">${n.title}</div><div class="banner-meta">${n.category} · ${n.publish_time?n.publish_time.split(' ')[0]:''}</div></div></div>`).join('');
+    el.innerHTML=`<div class="banner-slides" id="${containerId}Slides">${slides}</div><button class="banner-prev" onclick="bannerSlide('${containerId}',-1)">‹</button><button class="banner-next" onclick="bannerSlide('${containerId}',1)">›</button><div class="banner-dots" id="${containerId}Dots">${news.slice(0,5).map((_,i)=>`<span class="${i===0?'active':''}" onclick="bannerGo('${containerId}',${i})"></span>`).join('')}</div>`;
+    bannerIdx[containerId]=0;bannerLen[containerId]=news.slice(0,5).length;
+    if(!bannerInterval[containerId])bannerInterval[containerId]=setInterval(()=>bannerSlide(containerId,1),5000);
+}
+let bannerIdx={},bannerLen={},bannerInterval={};
+function bannerSlide(id,dir){
+    const n=(bannerIdx[id]??0)+dir,max=bannerLen[id]||1;
+    bannerIdx[id]=(n+max)%max;
+    const slides=document.getElementById(id+'Slides');if(slides)slides.style.transform=`translateX(-${bannerIdx[id]*100}%)`;
+    document.querySelectorAll(`#${id}Dots span`).forEach((s,i)=>s.classList.toggle('active',i===bannerIdx[id]));
+}
+function bannerGo(id,i){const cur=bannerIdx[id]||0;bannerSlide(id,i-cur)}
+
+// ==================== 工具函数 ====================
+function formatDateTime(dt){
+    if(!dt)return '-';
+    const d=new Date(dt.replace(/-/g,'/'));
+    if(isNaN(d.getTime()))return dt;
+    const pad=n=>n.toString().padStart(2,'0');
+    const Y=d.getFullYear(),M=pad(d.getMonth()+1),D=pad(d.getDate());
+    const h=pad(d.getHours()),m=pad(d.getMinutes()),s=pad(d.getSeconds());
+    return `${Y}-${M}-${D} ${h}:${m}:${s}`;
+}
+function formatDate(dt){
+    if(!dt)return '-';
+    const d=new Date(dt.replace(/-/g,'/'));
+    if(isNaN(d.getTime()))return dt.split(' ')[0]||dt;
+    const pad=n=>n.toString().padStart(2,'0');
+    const Y=d.getFullYear(),M=pad(d.getMonth()+1),D=pad(d.getDate());
+    return `${Y}-${M}-${D}`;
+}
+
+// ==================== 反馈批量处理 ====================
+let selectedFeedback=new Set();
+function toggleFeedbackSelect(fid,cb){if(cb.checked)selectedFeedback.add(fid);else selectedFeedback.delete(fid);document.getElementById('batchFbBtn').style.display=selectedFeedback.size>0?'':'none'}
+function toggleAllFeedback(cb){document.querySelectorAll('.fb-checkbox').forEach(c=>{c.checked=cb.checked;if(cb.checked)selectedFeedback.add(+c.value);else selectedFeedback.delete(+c.value)});document.getElementById('batchFbBtn').style.display=cb.checked&&selectedFeedback.size>0?'':'none'}
+async function batchProcessFeedback(){
+    if(selectedFeedback.size===0){showToast('请勾选反馈','warning');return}
+    if(!confirm(`确定将${selectedFeedback.size}条反馈标记为"已处理"？`))return;
+    let ok=0;
+    for(const fid of selectedFeedback){
+        try{const r=await fetch(`/api/feedback/${fid}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'processed',reply:'（批量处理）已处理'})});if((await r.json()).success)ok++}catch(e){}
+    }
+    selectedFeedback.clear();document.getElementById('batchFbBtn').style.display='none';
+    showToast(`成功处理 ${ok} 条反馈`,'success');adminLoadFeedback(feedbackCurrentPage);
+}
+
+// ==================== 管理员导航 ====================
+function adminShow(section){
+    if(uptimeInterval){clearInterval(uptimeInterval);uptimeInterval=null}
+    currentSection=section;
+    const titles={home:'🏠 首页概览',news:'📰 新闻管理',services:'⚙️ 服务管理',feedback:'💬 反馈管理',users:'👥 用户管理',announcements:'📢 通知公告',stats:'📊 数据统计',logs:'📝 操作日志',monitor:'🖥️ 系统监控',settings:'⚙️ 系统设置'};
+    const breadcrumbMap={home:'概览',news:'新闻管理',services:'服务管理',feedback:'反馈管理',users:'用户管理',announcements:'通知公告',stats:'数据统计',logs:'操作日志',monitor:'系统监控',settings:'系统设置'};
+    document.getElementById('adminBreadcrumb').innerHTML=`<span onclick="adminShow('home')">🏠 首页</span><span class="bc-sep">/</span><span>${breadcrumbMap[section]||''}</span>`;
+    updateFooter();
+    document.getElementById('adminPageTitle').textContent=titles[section]||'';
+    document.querySelectorAll('#adminShell .nav-item').forEach(b=>b.classList.remove('active'));
+    const nav=document.getElementById('nav'+section.charAt(0).toUpperCase()+section.slice(1));if(nav)nav.classList.add('active');
+    if(section==='home')renderAdminHome();
+    if(section==='news')renderAdminNews();
+    if(section==='services')renderAdminServices();
+    if(section==='feedback')renderAdminFeedback();
+    if(section==='blogs')renderAdminBlogs();
+    if(section==='users')renderAdminUsers();
+    if(section==='departments')renderAdminDepartments();
+    if(section==='announcements')renderAdminAnnouncements();
+    if(section==='stats')renderAdminStats();
+    if(section==='logs')renderAdminLogs();
+    if(section==='monitor')renderAdminMonitor();
+    if(section==='settings')renderAdminSettings();
+}
+
+// ==================== 管理员首页 ====================
+async function renderAdminHome(){
+    let h=`<div class="banner" id="aBanner"><div class="loading-text" style="color:#fff;display:flex;align-items:center;justify-content:center;height:100%">加载中...</div></div>
+    <div class="stats-row">
+        <div class="stat-card"><div class="stat-icon-box blue">📰</div><div><div class="stat-num" id="aStatNews">0</div><div class="stat-label">政务新闻</div></div></div>
+        <div class="stat-card"><div class="stat-icon-box green">⚙️</div><div><div class="stat-num" id="aStatServices">0</div><div class="stat-label">政务服务</div></div></div>
+        <div class="stat-card"><div class="stat-icon-box orange">💬</div><div><div class="stat-num" id="aStatFeedback">0</div><div class="stat-label">用户反馈</div></div></div>
+        <div class="stat-card"><div class="stat-icon-box purple">📝</div><div><div class="stat-num" id="aStatBlogs">0</div><div class="stat-label">博客文章</div></div></div>
+    </div>
+    <div class="home-grid">
+        <div>
+            <div class="home-panel"><div class="home-panel-hd">📋 最新政务动态</div><div class="home-panel-bd" id="aHomeNews"><div class="loading-text">加载中...</div></div></div>
+            <div class="home-panel" style="margin-top:24px"><div class="home-panel-hd">🔥 热门政务服务</div><div class="home-panel-bd" id="aHomeServices"><div class="loading-text">加载中...</div></div></div>
+        </div>
+        <div>
+            <div class="home-panel"><div class="home-panel-hd">📌 最近活动</div><div class="home-panel-bd" id="aTimeline"><div class="loading-text">加载中...</div></div></div>
+            <div class="home-panel" style="margin-top:24px"><div class="home-panel-hd">👥 最近注册用户</div><div class="home-panel-bd" id="aRecentUsers"><div class="loading-text">加载中...</div></div></div>
+        </div>
+    </div>
+    <div class="home-grid" style="margin-top:24px">
+        <div class="home-panel"><div class="home-panel-hd">✉️ 在线反馈</div><div class="home-panel-bd">
+            <div class="form-group" style="display:flex;gap:12px"><input type="text" id="afbName" placeholder="您的姓名" style="flex:1"><input type="text" id="afbPhone" placeholder="联系电话" style="flex:1"></div>
+            <div class="form-group"><select id="afbType"><option value="咨询">咨询</option><option value="投诉">投诉</option><option value="建议">建议</option><option value="表扬">表扬</option></select></div>
+            <div class="form-group"><textarea id="afbContent" placeholder="请输入反馈内容..." style="min-height:80px"></textarea></div>
+            <button class="btn btn-blue" onclick="adminSubmitFeedback()" style="width:100%">📨 提交反馈</button>
+        </div></div>
+        <div class="home-panel"><div class="home-panel-hd">📝 最新博客</div><div class="home-panel-bd" id="aHomeBlogs"><div class="loading-text">加载中...</div></div></div>
+    </div>`;
+    document.getElementById('adminContent').innerHTML=h;
+    try{
+        const n=await(await fetch('/api/news?per_page=1')).json(),s=await(await fetch('/api/services')).json(),f=await(await fetch('/api/feedback')).json();
+        document.getElementById('aStatNews').textContent=n.total||0;
+        document.getElementById('aStatServices').textContent=Array.isArray(s)?s.length:(s.services?s.services.length:0);
+        const total=f.total||0,processed=f.feedback?f.feedback.filter(x=>x.status==='processed').length:0,pending=f.feedback?f.feedback.filter(x=>x.status==='pending').length:0;
+        document.getElementById('aStatFeedback').textContent=total;
+        const badge=document.getElementById('pendingBadge');
+        if(badge){badge.textContent=pending;badge.style.display=pending>0?'inline-flex':'none';badge.className='badge-count';if(pending>=10)badge.classList.add('danger');else if(pending>=5)badge.classList.add('warning')}
+        fetch('/api/admin/blogs?per_page=1').then(r=>r.json()).then(d=>{if(d.total!==undefined)document.getElementById('aStatBlogs').textContent=d.total}).catch(()=>{});
+        fetch('/api/blogs?per_page=4').then(r=>r.json()).then(d=>{if(d.blogs){let bh='';d.blogs.forEach(b=>{bh+=`<div class="blog-card" onclick="viewBlog(${b.id})"><div class="blog-card-hd"><span class="blog-card-title">${b.title}</span></div><div class="blog-card-body">${b.content.replace(/<[^>]*>/g,'').substring(0,80)}${b.content.length>80?'...':''}</div><div class="blog-card-ft"><span>✍️ ${b.username}</span><span>${b.created_at?b.created_at.split(' ')[0]:''}</span></div></div>`});document.getElementById('aHomeBlogs').innerHTML=bh||'<div class="empty-text">暂无博客</div>'}}).catch(()=>{});
+        const n2=await(await fetch('/api/news?per_page=4')).json();
+        let nh='';if(n2.news)n2.news.forEach(x=>{nh+=`<div class="news-item" onclick="adminViewNews(${x.id})"><span class="news-cat">${x.category}</span><div class="news-title">${x.title}</div><div class="news-meta"><span>${x.author||''}</span><span>${x.publish_time?x.publish_time.split(' ')[0]:''}</span></div></div>`});
+        document.getElementById('aHomeNews').innerHTML=nh||'<div class="empty-text">暂无新闻</div>';
+        const list=Array.isArray(s)?s:(s.services||[]);let sh='';
+        list.slice(0,4).forEach(x=>{sh+=`<div class="svc-card-mini"><span class="svc-icon-sm">${x.icon||'📋'}</span><div><div class="svc-name-sm">${x.name}</div><div class="svc-desc-sm">${x.description||''}</div></div></div>`});
+        document.getElementById('aHomeServices').innerHTML=sh||'<div class="empty-text">暂无服务</div>';
+        const lr=await fetch('/api/logs?per_page=6'),ld=await lr.json();
+        let th='';if(ld.logs)ld.logs.forEach(l=>{th+=`<div class="timeline-item"><div class="tl-time">${l.time}</div><div class="tl-action">${l.action}</div><div class="tl-detail">${l.details}</div></div>`});
+        document.getElementById('aTimeline').innerHTML=`<div class="timeline">${th||'<div class="empty-text">暂无记录</div>'}</div>`;
+        // 最近注册用户
+        const pur=await fetch('/api/users?per_page=5');const pud=await pur.json();
+        let ruh='';if(pud.users)pud.users.forEach(u=>{ruh+=`<div style="display:flex;align-items:center;gap:12px;padding:10px;margin-bottom:6px;border-radius:8px;background:var(--bg);transition:background var(--transition)"><div style="width:36px;height:36px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">${(u.name||u.username).charAt(0)}</div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:var(--text)">${u.username}</div><div style="font-size:11px;color:var(--text-secondary)">${u.name||u.username}</div></div><div style="font-size:11px;color:var(--text-secondary);white-space:nowrap">${u.created_at?u.created_at.split(' ')[0]:''}</div></div>`});
+        document.getElementById('aRecentUsers').innerHTML=ruh||'<div class="empty-text">暂无注册用户</div>';
+        // Banner
+        const br=await(await fetch('/api/news?per_page=5')).json();
+        if(br.news){renderBanner('aBanner',br.news.filter(n=>n.image_url))}
+    }catch(e){}
+}
+
+async function adminSubmitFeedback(){
+    const name=document.getElementById('afbName').value,phone=document.getElementById('afbPhone').value,type=document.getElementById('afbType').value,content=document.getElementById('afbContent').value;
+    if(!name||!content){showToast('请填写姓名和内容','warning');return}
+    try{const r=await fetch('/api/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,phone,type,content})});const d=await r.json();if(d.success){showToast('反馈提交成功','success');document.getElementById('afbName').value='';document.getElementById('afbPhone').value='';document.getElementById('afbContent').value='';renderAdminHome()}else showToast(d.message||'提交失败','error')}catch(e){showToast('提交失败','error')}
+}
+
+// ==================== 管理员-新闻管理 ====================
+async function renderAdminNews(){
+    document.getElementById('adminContent').innerHTML=`<div class="panel"><div class="panel-toolbar"><h2>📰 新闻管理</h2><div class="toolbar-right"><input class="input" type="text" id="newsSearchInput" placeholder="🔍 搜索新闻..." onkeyup="adminNewsSearch()"><select class="select" id="newsCategoryFilter" onchange="adminNewsFilter()"><option value="">全部分类</option><option value="政策法规">政策法规</option><option value="政务动态">政务动态</option><option value="通知公告">通知公告</option><option value="办事指南">办事指南</option><option value="政务公开">政务公开</option></select><button class="btn btn-blue" onclick="adminAddNews()">➕ 添加新闻</button><button class="btn btn-green" onclick="adminExportNewsData()">📥 导出</button></div></div><div class="table-wrap"><table><thead><tr><th>ID</th><th>标题</th><th>分类</th><th>作者</th><th>发布时间</th><th>状态</th><th>操作</th></tr></thead><tbody id="newsTableBody"><tr><td colspan="7"><div class="loading-text">加载中...</div></td></tr></tbody></table></div><div class="pager" id="newsPagination"><button onclick="adminLoadNews(newsCurrentPage-1)" disabled>上一页</button><span class="page-info">第1页/共1页</span><button onclick="adminLoadNews(newsCurrentPage+1)" disabled>下一页</button></div></div>`;
+    adminLoadNews();
+}
+async function adminLoadNews(page=1){
+    try{const s=document.getElementById('newsSearchInput')?.value||'',c=document.getElementById('newsCategoryFilter')?.value||'',r=await fetch(`/api/news?page=${page}&per_page=10&search=${encodeURIComponent(s)}&category=${encodeURIComponent(c)}`),d=await r.json();if(d.error)return;newsCurrentPage=page;let h='';d.news.forEach(n=>{h+=`<tr><td style="font-weight:600">${n.id}</td><td style="font-weight:600;color:var(--primary);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${n.title}</td><td><span class="badge badge-blue">${n.category}</span></td><td>${n.author||'-'}</td><td style="color:var(--text-secondary)">${n.publish_time?n.publish_time.split(' ')[0]:''}</td><td><span class="badge ${n.status==='published'?'badge-green':'badge-gray'}">${n.status==='published'?'已发布':'草稿'}</span></td><td><div class="action-btns"><button class="btn btn-gray btn-sm" onclick="adminViewNews(${n.id})">查看</button><button class="btn btn-blue btn-sm" onclick="adminEditNews(${n.id})">编辑</button><button class="btn ${n.status==='published'?'btn-gray':'btn-green'} btn-sm" onclick="adminToggleNewsStatus(${n.id},'${n.status}')">${n.status==='published'?'📥撤回':'📤发布'}</button><button class="btn btn-red btn-sm" onclick="adminDelNews(${n.id})">删除</button></div></td></tr>`});document.getElementById('newsTableBody').innerHTML=h||'<tr><td colspan="7"><div class="empty-text">暂无数据</div></td></tr>';updateNewsPager(d.total,d.total_pages)}catch(e){showToast('加载失败','error')}
+}
+function updateNewsPager(t,tp){const p=document.getElementById('newsPagination'),bs=p.querySelectorAll('button');bs[0].disabled=newsCurrentPage<=1;bs[1].disabled=newsCurrentPage>=tp;p.querySelector('.page-info').textContent=`第${newsCurrentPage}页/共${tp||1}页`}
+function adminNewsSearch(){newsCurrentPage=1;debounce('newsSearch',()=>adminLoadNews())}function adminNewsFilter(){newsCurrentPage=1;adminLoadNews()}
+
+function adminAddNews(){
+    document.getElementById('modalTitle').textContent='➕ 添加新闻';
+    document.getElementById('modalBody').innerHTML=`<input type="hidden" id="newsId" value=""><div class="form-group"><label>标题</label><input type="text" id="newsTitle" placeholder="请输入新闻标题"></div><div class="form-group"><label>分类</label><select id="newsCategory"><option value="政策法规">政策法规</option><option value="政务动态">政务动态</option><option value="通知公告">通知公告</option><option value="办事指南">办事指南</option><option value="政务公开">政务公开</option></select></div><div class="form-group"><label>封面图URL</label><input type="text" id="newsImage" placeholder="可选，如 https://..."></div><div class="form-group"><label>内容</label><textarea id="newsContent" placeholder="请输入新闻内容"></textarea></div>`;
+    document.getElementById('modalFooter').innerHTML='<button class="btn btn-outline" onclick="closeModal()">取消</button><button class="btn btn-blue" onclick="adminSaveNews()">💾 保存</button>';
+    document.getElementById('genericModal').classList.add('show');
+}
+async function adminEditNews(id){
+    try{const r=await fetch(`/api/news/${id}`),d=await r.json();if(d.error)return;document.getElementById('modalTitle').textContent='✏️ 编辑新闻';document.getElementById('modalBody').innerHTML=`<input type="hidden" id="newsId" value="${d.id}"><div class="form-group"><label>标题</label><input type="text" id="newsTitle" value="${d.title||''}"></div><div class="form-group"><label>分类</label><select id="newsCategory">${['政策法规','政务动态','通知公告','办事指南','政务公开'].map(c=>`<option value="${c}" ${d.category===c?'selected':''}>${c}</option>`).join('')}</select></div><div class="form-group"><label>封面图URL</label><input type="text" id="newsImage" value="${d.image_url||''}"></div><div class="form-group"><label>内容</label><textarea id="newsContent">${d.content||''}</textarea></div>`;document.getElementById('modalFooter').innerHTML='<button class="btn btn-outline" onclick="closeModal()">取消</button><button class="btn btn-blue" onclick="adminSaveNews()">💾 更新</button>';document.getElementById('genericModal').classList.add('show')}catch(e){showToast('加载失败','error')}
+}
+async function adminSaveNews(){
+    const id=document.getElementById('newsId').value,title=document.getElementById('newsTitle').value,category=document.getElementById('newsCategory').value,content=document.getElementById('newsContent').value,image_url=document.getElementById('newsImage').value;
+    if(!title||!content){showToast('请填写标题和内容','warning');return}
+    try{const r=await fetch(id?`/api/news/${id}`:'/api/news',{method:id?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title,category,content,image_url,status:'published'})}),d=await r.json();if(d.success){showToast(id?'更新成功':'添加成功','success');closeModal();adminLoadNews(newsCurrentPage)}else showToast(d.message||'操作失败','error')}catch(e){showToast('操作失败','error')}
+}
+async function adminDelNews(id){if(!confirm('确定删除？'))return;try{const r=await fetch(`/api/news/${id}`,{method:'DELETE'});if((await r.json()).success){showToast('删除成功','success');adminLoadNews(newsCurrentPage)}}catch(e){showToast('删除失败','error')}}
+async function adminToggleNewsStatus(id,currentStatus){const newStatus=currentStatus==='published'?'draft':'published';try{const r=await fetch(`/api/news/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:newStatus})}),d=await r.json();if(d.success){showToast(newStatus==='published'?'✅ 已发布':'📥 已撤回为草稿','success');adminLoadNews(newsCurrentPage)}else showToast(d.message||'操作失败','error')}catch(e){showToast('操作失败','error')}}
+
+function highlightText(text,query){if(!query||query.length<2)return text;const escaped=query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),re=new RegExp(`(${escaped})`,'gi');return text.replace(re,'<mark style="background:#fde047;color:#333;padding:0 2px;border-radius:2px">$1</mark>')}
+async function adminViewNews(id){
+    try{const r=await fetch(`/api/news/${id}`),d=await r.json();if(d.error)return;document.getElementById('modalTitle').textContent='📰 新闻详情';document.getElementById('modalBody').innerHTML=`${d.image_url?`<div style="margin-bottom:16px;border-radius:8px;overflow:hidden;max-height:200px"><img src="${d.image_url}" style="width:100%;object-fit:cover" onerror="this.style.display='none'"></div>`:''}<div class="detail-row"><span class="detail-label">标题</span><span class="detail-value" style="font-weight:600;color:var(--primary)">${d.title}</span></div><div class="detail-row"><span class="detail-label">分类</span><span class="detail-value"><span class="badge badge-blue">${d.category}</span></span></div><div class="detail-row"><span class="detail-label">作者</span><span class="detail-value">${d.author||'-'}</span></div><div class="detail-row"><span class="detail-label">时间</span><span class="detail-value">${d.publish_time||'-'}</span></div><div style="margin-top:12px;padding:14px;background:var(--detail-bg);border-radius:8px;font-size:13px;line-height:1.8">${d.content}</div>`;document.getElementById('modalFooter').innerHTML='<button class="btn btn-outline" onclick="closeModal()">关闭</button>';document.getElementById('genericModal').classList.add('show')}catch(e){}}
+
+// ==================== 管理员-服务管理 ====================
+async function renderAdminServices(){
+    document.getElementById('adminContent').innerHTML=`<div class="panel"><div class="panel-toolbar"><h2>⚙️ 政务服务管理</h2><button class="btn btn-blue" onclick="adminAddService()">➕ 添加服务</button></div><div class="services-grid" id="servicesGrid"><div class="loading-text" style="grid-column:1/-1">加载中...</div></div></div>`;adminLoadServices();
+}
+async function adminLoadServices(){
+    try{const r=await fetch('/api/services'),s=await r.json();if(s.error)return;const list=Array.isArray(s)?s:(s.services||[]);let h='';list.forEach(x=>{h+=`<div class="service-card"><div class="svc-icon">${x.icon||'📋'}</div><div class="svc-name">${x.name}</div><div class="svc-desc">${x.description||''}</div><div class="svc-actions"><button class="btn btn-blue btn-sm" onclick="adminEditService(${x.id})">✏️ 编辑</button><button class="btn btn-red btn-sm" onclick="adminDelService(${x.id})">🗑️ 删除</button></div></div>`});document.getElementById('servicesGrid').innerHTML=h||'<div class="empty-text" style="grid-column:1/-1">暂无服务</div>'}catch(e){}
+}
+function adminAddService(){
+    document.getElementById('modalTitle').textContent='➕ 添加服务';document.getElementById('modalBody').innerHTML=`<input type="hidden" id="serviceId" value=""><div class="form-group"><label>服务名称</label><input type="text" id="serviceName"></div><div class="form-group"><label>描述</label><textarea id="serviceDesc"></textarea></div><div class="form-group"><label>类型</label><select id="serviceType"><option value="企业开办">企业开办</option><option value="税务办理">税务办理</option><option value="社保服务">社保服务</option><option value="医疗服务">医疗服务</option><option value="教育服务">教育服务</option><option value="住房服务">住房服务</option><option value="其他">其他</option></select></div><div class="form-group"><label>图标</label><input type="text" id="serviceIcon" value="📋"></div>`;document.getElementById('modalFooter').innerHTML='<button class="btn btn-outline" onclick="closeModal()">取消</button><button class="btn btn-blue" onclick="adminSaveService()">💾 保存</button>';document.getElementById('genericModal').classList.add('show');
+}
+async function adminEditService(id){
+    try{const r=await fetch('/api/services'),s=await r.json();const list=Array.isArray(s)?s:(s.services||[]);const x=list.find(v=>v.id===id);if(!x)return;document.getElementById('modalTitle').textContent='✏️ 编辑服务';document.getElementById('modalBody').innerHTML=`<input type="hidden" id="serviceId" value="${x.id}"><div class="form-group"><label>服务名称</label><input type="text" id="serviceName" value="${x.name||''}"></div><div class="form-group"><label>描述</label><textarea id="serviceDesc">${x.description||''}</textarea></div><div class="form-group"><label>类型</label><select id="serviceType">${['企业开办','税务办理','社保服务','医疗服务','教育服务','住房服务','其他'].map(t=>`<option value="${t}" ${x.type===t?'selected':''}>${t}</option>`).join('')}</select></div><div class="form-group"><label>图标</label><input type="text" id="serviceIcon" value="${x.icon||'📋'}"></div>`;document.getElementById('modalFooter').innerHTML='<button class="btn btn-outline" onclick="closeModal()">取消</button><button class="btn btn-blue" onclick="adminSaveService()">💾 更新</button>';document.getElementById('genericModal').classList.add('show')}catch(e){}
+}
+async function adminSaveService(){
+    const id=document.getElementById('serviceId').value,name=document.getElementById('serviceName').value,desc=document.getElementById('serviceDesc').value,type=document.getElementById('serviceType').value,icon=document.getElementById('serviceIcon').value;
+    if(!name){showToast('请输入服务名称','warning');return}
+    try{const r=await fetch(id?`/api/services/${id}`:'/api/services',{method:id?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,description:desc,type,icon})}),d=await r.json();if(d.success){showToast(id?'更新成功':'添加成功','success');closeModal();adminLoadServices()}else showToast(d.message||'操作失败','error')}catch(e){showToast('操作失败','error')}
+}
+async function adminDelService(id){if(!confirm('确定删除？'))return;try{await fetch(`/api/services/${id}`,{method:'DELETE'});showToast('删除成功','success');adminLoadServices()}catch(e){showToast('删除失败','error')}}
+
+// ==================== 管理员-反馈管理 ====================
+async function renderAdminFeedback(){
+    document.getElementById('adminContent').innerHTML=`<div class="panel"><div class="panel-toolbar"><h2>💬 用户反馈管理</h2><div class="toolbar-right"><select class="select" id="feedbackTypeFilter" onchange="adminLoadFeedback()"><option value="">全部类型</option><option value="咨询">咨询</option><option value="投诉">投诉</option><option value="建议">建议</option><option value="表扬">表扬</option></select><select class="select" id="feedbackStatusFilter" onchange="adminLoadFeedback()"><option value="">全部状态</option><option value="pending">待处理</option><option value="processed">已处理</option></select><button class="btn btn-green" onclick="adminExportFeedback()">📥 导出</button><button class="btn btn-blue" onclick="batchProcessFeedback()" id="batchFbBtn" style="display:none">✅ 批量处理</button></div></div><div style="padding:8px 24px;background:var(--table-stripe);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px"><label style="font-size:12px;color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;gap:4px"><input type="checkbox" onchange="toggleAllFeedback(this)" style="width:14px;height:14px"> 全选</label></div><div class="table-wrap"><table><thead><tr><th style="width:36px"></th><th>ID</th><th>姓名</th><th>电话</th><th>类型</th><th>内容</th><th>状态</th><th>时间</th><th>操作</th></tr></thead><tbody id="feedbackTableBody"><tr><td colspan="9"><div class="loading-text">加载中...</div></td></tr></tbody></table></div><div class="pager" id="feedbackPagination"><button onclick="adminLoadFeedback(feedbackCurrentPage-1)" disabled>上一页</button><span class="page-info">第1页/共1页</span><button onclick="adminLoadFeedback(feedbackCurrentPage+1)" disabled>下一页</button></div></div>`;adminLoadFeedback();
+}
+async function adminLoadFeedback(page=1){
+    try{const t=document.getElementById('feedbackTypeFilter')?.value||'',s=document.getElementById('feedbackStatusFilter')?.value||'',r=await fetch(`/api/feedback?page=${page}&per_page=10&type=${encodeURIComponent(t)}&status=${encodeURIComponent(s)}`),d=await r.json();if(d.error)return;feedbackCurrentPage=page;selectedFeedback.clear();document.getElementById('batchFbBtn').style.display='none';let h='';d.feedback.forEach(x=>{h+=`<tr><td><input type="checkbox" class="fb-checkbox" value="${x.id}" onchange="toggleFeedbackSelect(${x.id},this)" style="width:14px;height:14px;cursor:pointer"></td><td style="font-weight:600;cursor:pointer" ondblclick="copyToClipboard('${x.id}')" title="双击复制">${x.id}</td><td style="font-weight:600;color:var(--primary)">${x.name}</td><td style="cursor:pointer" ondblclick="copyToClipboard('${x.phone||''}')" title="双击复制">${x.phone||'-'}</td><td><span class="badge badge-orange">${x.type}</span></td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${x.content}</td><td><span class="badge ${x.status==='pending'?'badge-red':'badge-green'}">${x.status==='pending'?'待处理':'已处理'}</span></td><td style="color:var(--text-secondary)">${x.create_time?x.create_time.split(' ')[0]:''}</td><td><div class="action-btns"><button class="btn btn-gray btn-sm" onclick="adminViewFeedback(${x.id})">查看</button>${x.status==='pending'?`<button class="btn btn-green btn-sm" onclick="adminProcessFeedback(${x.id})">处理</button>`:''}<button class="btn btn-red btn-sm" onclick="adminDelFeedback(${x.id})">删除</button></div></td></tr>`});document.getElementById('feedbackTableBody').innerHTML=h||'<tr><td colspan="9"><div class="empty-text">暂无数据</div></td></tr>';updateFbPager(d.total,d.total_pages)}catch(e){showToast('加载失败','error')}
+}
+function updateFbPager(t,tp){const p=document.getElementById('feedbackPagination'),bs=p.querySelectorAll('button');bs[0].disabled=feedbackCurrentPage<=1;bs[1].disabled=feedbackCurrentPage>=tp;p.querySelector('.page-info').textContent=`第${feedbackCurrentPage}页/共${tp||1}页`}
+async function adminViewFeedback(id){try{const r=await fetch('/api/feedback'),d=await r.json();if(d.error)return;const x=d.feedback.find(v=>v.id===id);if(!x)return;document.getElementById('feedbackDetailBody').innerHTML=`<div class="detail-row"><span class="detail-label">姓名</span><span class="detail-value">${x.name}</span></div><div class="detail-row"><span class="detail-label">电话</span><span class="detail-value">${x.phone||'-'}</span></div><div class="detail-row"><span class="detail-label">类型</span><span class="detail-value"><span class="badge badge-orange">${x.type}</span></span></div><div class="detail-row"><span class="detail-label">状态</span><span class="detail-value"><span class="badge ${x.status==='pending'?'badge-red':'badge-green'}">${x.status==='pending'?'待处理':'已处理'}</span></span></div><div class="detail-row"><span class="detail-label">时间</span><span class="detail-value">${x.create_time||'-'}</span></div><div style="margin-top:12px;padding:14px;background:var(--detail-bg);border-radius:8px;font-size:13px;line-height:1.8">${x.content}</div>${x.reply?`<div style="margin-top:12px;padding:14px;background:var(--reply-bg);border-radius:8px;font-size:13px;line-height:1.8;border:1px solid var(--reply-border)"><strong style="color:#16a34a">官方回复：</strong>${x.reply}<br><small style="color:#9ca3af">${x.reply_time||''}</small></div>`:''}`;document.getElementById('feedbackDetailModal').classList.add('show')}catch(e){}}
+function adminProcessFeedback(id){document.getElementById('modalTitle').textContent='✉️ 处理反馈';document.getElementById('modalBody').innerHTML=`<input type="hidden" id="processFeedbackId" value="${id}"><div class="form-group"><label>回复内容</label><textarea id="feedbackReply"></textarea></div>`;document.getElementById('modalFooter').innerHTML='<button class="btn btn-outline" onclick="closeModal()">取消</button><button class="btn btn-green" onclick="adminDoProcessFeedback()">📨 提交回复</button>';document.getElementById('genericModal').classList.add('show')}
+async function adminDoProcessFeedback(){const id=document.getElementById('processFeedbackId').value,reply=document.getElementById('feedbackReply').value;if(!reply){showToast('请输入回复','warning');return}try{const r=await fetch(`/api/feedback/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'processed',reply})}),d=await r.json();if(d.success){showToast('处理成功','success');closeModal();adminLoadFeedback(feedbackCurrentPage)}else showToast(d.message||'处理失败','error')}catch(e){showToast('处理失败','error')}}
+async function adminDelFeedback(id){if(!confirm('确定删除？'))return;try{await fetch(`/api/feedback/${id}`,{method:'DELETE'});showToast('删除成功','success');adminLoadFeedback(feedbackCurrentPage)}catch(e){showToast('删除失败','error')}}
+
+// ==================== 管理员-用户管理 ====================
+async function renderAdminUsers(){
+    document.getElementById('adminContent').innerHTML=`<div class="panel"><div class="panel-toolbar"><h2>👥 用户管理</h2><div class="toolbar-right"><select class="select" id="statusFilter" onchange="adminLoadUsers()"><option value="">全部状态</option><option value="active">活跃</option><option value="inactive">非活跃</option></select><input class="input" type="text" id="searchInput" placeholder="🔍 搜索用户..." onkeyup="debounce('userSearch',()=>{currentPage=1;adminLoadUsers()})"><button class="btn btn-blue" onclick="adminAddUser()">➕ 添加用户</button><button class="btn btn-green" onclick="adminExportUsers()">📥 导出</button><button class="btn btn-red" onclick="adminBatchDel()" id="batchDeleteBtn" style="display:none">🗑️ 批量删除</button></div></div><div style="padding:12px 24px;background:var(--table-stripe);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px"><label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:var(--text-secondary)"><input type="checkbox" id="selectAll" onchange="adminToggleAll()" style="width:16px;height:16px"> 全选</label><span id="selectedCount" style="font-size:13px;color:var(--text-secondary)"></span></div><div class="table-wrap"><table><thead><tr><th style="width:40px"></th><th>ID</th><th>用户名</th><th>姓名</th><th>邮箱</th><th>电话</th><th>部门</th><th>状态</th><th>最后登录</th><th>创建时间</th><th>操作</th></tr></thead><tbody id="usersTableBody"><tr><td colspan="11"><div class="loading-text">加载中...</div></td></tr></tbody></table></div><div class="pager" id="usersPagination"><button onclick="adminLoadUsers(currentPage-1)" disabled>上一页</button><span class="page-info">第1页/共1页</span><button onclick="adminLoadUsers(currentPage+1)" disabled>下一页</button></div></div>`;adminLoadUsers();
+}
+async function adminLoadUsers(page=1){
+    try{const s=document.getElementById('searchInput')?.value||'',st=document.getElementById('statusFilter')?.value||'',r=await fetch(`/api/users?page=${page}&per_page=10&search=${encodeURIComponent(s)}&status=${encodeURIComponent(st)}`),d=await r.json();if(d.error)return;currentPage=page;selectedUsers.clear();document.getElementById('selectAll').checked=false;document.getElementById('batchDeleteBtn').style.display='none';document.getElementById('selectedCount').textContent='';let h='';d.users.forEach(u=>{h+=`<tr><td><input type="checkbox" class="user-checkbox" value="${u.id}" onchange="adminToggleUser(${u.id},this)" style="width:16px;height:16px;cursor:pointer"></td><td style="font-weight:600;cursor:pointer" ondblclick="copyToClipboard('${u.id}')" title="双击复制">${u.id}</td><td style="font-weight:600;color:var(--primary)">${u.username||'-'}</td><td style="font-weight:600">${u.name||'-'}</td><td style="cursor:pointer" ondblclick="copyToClipboard('${u.email}')" title="双击复制">${u.email||'-'}</td><td>${u.phone||'-'}</td><td>${u.department||'-'}</td><td><span class="badge ${u.status==='active'?'badge-green':'badge-red'}">${u.status==='active'?'活跃':'非活跃'}</span></td><td style="color:var(--text-secondary);font-size:12px">${u.last_login_time?u.last_login_time.split(' ')[0]:'从未登录'}</td><td style="color:var(--text-secondary);font-size:12px">${u.created_at?u.created_at.split(' ')[0]:''}</td><td><div class="action-btns"><button class="btn btn-gray btn-sm" onclick="adminViewUser(${u.id})">查看</button><button class="btn btn-blue btn-sm" onclick="adminEditUser(${u.id})">编辑</button><button class="btn btn-red btn-sm" onclick="adminDelUser(${u.id})">删除</button></div></td></tr>`});document.getElementById('usersTableBody').innerHTML=h||'<tr><td colspan="11"><div class="empty-text">暂无数据</div></td></tr>';updateUsersPager(d.total,d.total_pages)}catch(e){showToast('加载失败','error')}
+}
+function updateUsersPager(t,tp){const p=document.getElementById('usersPagination'),bs=p.querySelectorAll('button');bs[0].disabled=currentPage<=1;bs[1].disabled=currentPage>=tp;p.querySelector('.page-info').textContent=`第${currentPage}页/共${tp||1}页`}
+function adminToggleAll(){const c=document.getElementById('selectAll').checked;document.querySelectorAll('.user-checkbox').forEach(cb=>{cb.checked=c;if(c)selectedUsers.add(+cb.value);else selectedUsers.delete(+cb.value)});updateBatchBtn()}
+function adminToggleUser(id,cb){if(cb.checked)selectedUsers.add(id);else selectedUsers.delete(id);document.getElementById('selectAll').checked=selectedUsers.size===document.querySelectorAll('.user-checkbox').length;updateBatchBtn()}
+function updateBatchBtn(){document.getElementById('batchDeleteBtn').style.display=selectedUsers.size>0?'':'none';document.getElementById('selectedCount').textContent=selectedUsers.size>0?`已选${selectedUsers.size}项`:''}
+async function adminBatchDel(){if(selectedUsers.size===0){showToast('请先选择用户','warning');return}if(!confirm(`确定删除${selectedUsers.size}个用户？`))return;try{let n=0;for(const id of selectedUsers){const r=await fetch(`/api/users/${id}`,{method:'DELETE'});if((await r.json()).success)n++}showToast(`成功删除${n}个用户`,'success');adminLoadUsers(currentPage)}catch(e){showToast('批量删除失败','error')}}
+function adminAddUser(){loadDeptOptions().then(deptOptions=>{document.getElementById('modalTitle').textContent='➕ 添加用户';document.getElementById('modalBody').innerHTML=`<input type="hidden" id="userId" value=""><div class="form-group"><label>用户名</label><input type="text" id="userUsername"></div><div class="form-group"><label>密码</label><input type="password" id="userPassword" placeholder="留空则默认为123456"></div><div class="form-group"><label>姓名</label><input type="text" id="userName"></div><div class="form-group"><label>邮箱</label><input type="email" id="userEmail"></div><div class="form-group"><label>电话</label><input type="text" id="userPhone"></div><div class="form-group"><label>部门</label><select id="userDepartment"><option value="">请选择部门</option>${deptOptions}</select></div><div class="form-group"><label>状态</label><select id="userStatus"><option value="active">活跃</option><option value="inactive">非活跃</option></select></div>`;document.getElementById('modalFooter').innerHTML='<button class="btn btn-outline" onclick="closeModal()">取消</button><button class="btn btn-blue" onclick="adminSaveUser()">💾 保存</button>';document.getElementById('genericModal').classList.add('show')})}
+async function adminEditUser(id){try{const r=await fetch('/api/users'),d=await r.json();if(d.error)return;const u=d.users.find(x=>x.id===id);if(!u)return;loadDeptOptions().then(deptOptions=>{document.getElementById('modalTitle').textContent='✏️ 编辑用户';document.getElementById('modalBody').innerHTML=`<input type="hidden" id="userId" value="${u.id}"><div class="form-group"><label>用户名</label><input type="text" value="${u.username||''}" disabled style="background:var(--input-bg);color:var(--text-secondary)"></div><div class="form-group"><label>密码</label><input type="password" id="userPassword" placeholder="留空则不修改密码"></div><div class="form-group"><label>姓名</label><input type="text" id="userName" value="${u.name||''}"></div><div class="form-group"><label>邮箱</label><input type="email" id="userEmail" value="${u.email||''}"></div><div class="form-group"><label>电话</label><input type="text" id="userPhone" value="${u.phone||''}"></div><div class="form-group"><label>部门</label><select id="userDepartment"><option value="">请选择部门</option>${deptOptions}</select></div><div class="form-group"><label>状态</label><select id="userStatus"><option value="active" ${u.status==='active'?'selected':''}>活跃</option><option value="inactive" ${u.status==='inactive'?'selected':''}>非活跃</option></select></div>`;document.getElementById('genericModal').classList.add('show');document.getElementById('userDepartment').value=u.department||'';document.getElementById('modalFooter').innerHTML='<button class="btn btn-outline" onclick="closeModal()">取消</button><button class="btn btn-blue" onclick="adminSaveUser()">💾 更新</button>'})}catch(e){showToast('加载失败','error')}}
+async function adminViewUser(id){try{const r=await fetch('/api/users'),d=await r.json();const u=d.users.find(x=>x.id===id);if(!u)return;document.getElementById('modalTitle').textContent='👤 用户详情';document.getElementById('modalBody').innerHTML=`<div class="detail-row"><span class="detail-label">ID</span><span class="detail-value">${u.id}</span></div><div class="detail-row"><span class="detail-label">用户名</span><span class="detail-value" style="font-weight:600;color:var(--primary)">${u.username||'-'}</span></div><div class="detail-row"><span class="detail-label">姓名</span><span class="detail-value">${u.name||'-'}</span></div><div class="detail-row"><span class="detail-label">邮箱</span><span class="detail-value">${u.email||'-'}</span></div><div class="detail-row"><span class="detail-label">电话</span><span class="detail-value">${u.phone||'-'}</span></div><div class="detail-row"><span class="detail-label">部门</span><span class="detail-value">${u.department||'-'}</span></div><div class="detail-row"><span class="detail-label">状态</span><span class="detail-value"><span class="badge ${u.status==='active'?'badge-green':'badge-red'}">${u.status==='active'?'活跃':'非活跃'}</span></span></div><div class="detail-row"><span class="detail-label">最后登录</span><span class="detail-value">${u.last_login_time||'从未登录'}</span></div><div class="detail-row"><span class="detail-label">创建时间</span><span class="detail-value">${u.created_at||'-'}</span></div><div class="detail-row"><span class="detail-label">更新时间</span><span class="detail-value">${u.updated_at||'-'}</span></div>`;document.getElementById('modalFooter').innerHTML='<button class="btn btn-outline" onclick="closeModal()">关闭</button>';document.getElementById('genericModal').classList.add('show')}catch(e){}}
+async function adminSaveUser(){const id=document.getElementById('userId').value,username=document.getElementById('userUsername')?.value,password=document.getElementById('userPassword')?.value,name=document.getElementById('userName').value,email=document.getElementById('userEmail').value,phone=document.getElementById('userPhone').value,department=document.getElementById('userDepartment').value,status=document.getElementById('userStatus').value;if(id){if(!name||!email){showToast('请填写姓名和邮箱','warning');return}try{const r=await fetch(`/api/users/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,phone,department,status,password})}),d=await r.json();if(d.success){showToast('更新成功','success');closeModal();adminLoadUsers(currentPage)}else showToast(d.message||'操作失败','error')}catch(e){showToast('操作失败','error')}}else{if(!username){showToast('请填写用户名','warning');return}try{const r=await fetch('/api/users',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password,name,email,phone,department,status})}),d=await r.json();if(d.success){showToast('添加成功','success');closeModal();adminLoadUsers(currentPage)}else showToast(d.message||'操作失败','error')}catch(e){showToast('操作失败','error')}}}
+async function adminDelUser(id){if(!confirm('确定删除？'))return;try{await fetch(`/api/users/${id}`,{method:'DELETE'});showToast('删除成功','success');adminLoadUsers(currentPage)}catch(e){showToast('删除失败','error')}}
+async function adminExportUsers(){try{const r=await fetch('/api/users/export'),users=await r.json();if(users.error)return;const hd='ID,姓名,邮箱,电话,部门,状态,创建时间',rows=users.map(u=>[u.id,u.name,u.email,u.phone||'',u.department||'',u.status==='active'?'活跃':'非活跃',u.created_at]),csv=[hd,...rows.map(r=>r.join(','))].join('\n'),blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}),l=document.createElement('a');l.href=URL.createObjectURL(blob);l.download=`users_${new Date().toISOString().split('T')[0]}.csv`;document.body.appendChild(l);l.click();document.body.removeChild(l);showToast('导出成功','success')}catch(e){showToast('导出失败','error')}}
+
+// ==================== 管理员-数据统计 ====================
+async function renderAdminStats(){document.getElementById('adminContent').innerHTML=`<div class="stats-row"><div class="stat-card"><div class="stat-icon-box blue">👥</div><div><div class="stat-num" id="statTotal">0</div><div class="stat-label">总用户数</div></div></div><div class="stat-card"><div class="stat-icon-box green">✅</div><div><div class="stat-num" id="statActive">0</div><div class="stat-label">活跃用户</div></div></div><div class="stat-card"><div class="stat-icon-box orange">⛔</div><div><div class="stat-num" id="statInactive">0</div><div class="stat-label">非活跃用户</div></div></div><div class="stat-card"><div class="stat-icon-box purple">📅</div><div><div class="stat-num" id="statToday">0</div><div class="stat-label">今日新增</div></div></div></div><div class="charts-row"><div class="chart-box"><h3>📊 部门用户分布</h3><div class="bar-chart" id="departmentChart"><div class="loading-text" style="width:100%">加载中...</div></div></div><div class="chart-box"><h3>🥧 用户状态分布</h3><div style="text-align:center"><div class="pie-chart" id="statusPie"></div><div class="pie-legend"><span><span class="dot" style="background:#6366f1"></span>活跃</span><span><span class="dot" style="background:#8b5cf6"></span>其他</span><span><span class="dot" style="background:#06b6d4"></span>非活跃</span></div></div></div></div>`;adminLoadStats();}
+async function adminLoadStats(){try{const r=await fetch('/api/stats'),d=await r.json();if(d.error)return;document.getElementById('statTotal').textContent=d.total||0;document.getElementById('statActive').textContent=d.active||0;document.getElementById('statInactive').textContent=d.inactive||0;document.getElementById('statToday').textContent=d.today||0;const r2=await fetch('/api/department_stats'),ds=await r2.json();if(!ds.error){const mx=Math.max(...ds.map(s=>s.count),1);let h='';ds.forEach(s=>{h+=`<div class="bar-item"><div class="bar-value">${s.count}</div><div class="bar-fill" style="height:${Math.round(s.count/mx*100)}%"></div><div class="bar-label">${s.department}</div></div>`});document.getElementById('departmentChart').innerHTML=h}document.getElementById('statusPie').style.setProperty('--active-deg',d.total>0?Math.round(d.active/d.total*360):0)}catch(e){}}
+
+// ==================== 操作日志 ====================
+let logsCurrentPage=1;
+async function renderAdminLogs(){
+    document.getElementById('adminContent').innerHTML=`<div class="panel"><div class="panel-toolbar"><h2>📝 操作日志</h2><div class="toolbar-right"><input class="input" type="text" id="logsSearchInput" placeholder="🔍 搜索日志..." onkeyup="debounce('logsSearch',()=>adminLoadLogs())"><button class="btn btn-red" onclick="adminClearLogs()">🗑️ 清空日志</button></div></div><div class="table-wrap"><table><thead><tr><th>时间</th><th>用户</th><th>操作</th><th>详情</th></tr></thead><tbody id="logsTableBody"><tr><td colspan="4"><div class="loading-text">加载中...</div></td></tr></tbody></table></div><div class="pager" id="logsPagination"><button onclick="adminLoadLogs(logsCurrentPage-1)" disabled>上一页</button><span class="page-info">第1页/共1页</span><button onclick="adminLoadLogs(logsCurrentPage+1)" disabled>下一页</button></div></div>`;adminLoadLogs();}
+async function adminLoadLogs(page=1){const q=document.getElementById('logsSearchInput')?.value?.toLowerCase()||'';try{const r=await fetch(`/api/logs?page=${page}&per_page=15`),d=await r.json();if(d.error)return;logsCurrentPage=page;let items=d.logs;if(q)items=d.logs.filter(l=>(l.user||'').toLowerCase().includes(q)||(l.action||'').toLowerCase().includes(q)||(l.details||'').toLowerCase().includes(q));let h='';items.forEach(l=>{h+=`<tr><td style="color:var(--text-secondary);font-size:12px">${l.time}</td><td style="font-weight:600;color:var(--primary)">${l.user}</td><td><span class="badge badge-blue">${l.action}</span></td><td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${l.details}</td></tr>`});document.getElementById('logsTableBody').innerHTML=h||'<tr><td colspan="4"><div class="empty-text">暂无匹配日志</div></td></tr>';const p=document.getElementById('logsPagination'),bs=p.querySelectorAll('button');bs[0].disabled=logsCurrentPage<=1;bs[1].disabled=logsCurrentPage>=d.total_pages;p.querySelector('.page-info').textContent=`第${logsCurrentPage}页/共${d.total_pages||1}页`}catch(e){}}
+async function adminClearLogs(){if(!confirm('确定清空所有操作日志？'))return;try{await fetch('/api/logs/clear',{method:'POST'});showToast('日志已清空','success');adminLoadLogs()}catch(e){showToast('清空失败','error')}}
+
+// ==================== 部门管理 ====================
+async function renderAdminDepartments(){
+    document.getElementById('adminContent').innerHTML=`<div class="panel"><div class="panel-toolbar"><h2>🏢 部门管理</h2><button class="btn btn-blue" onclick="adminShowDeptModal()">➕ 添加部门</button></div><div class="table-wrap"><table><thead><tr><th>ID</th><th>部门名称</th><th>创建时间</th><th>操作</th></tr></thead><tbody id="deptTableBody"><tr><td colspan="4"><div class="loading-text">加载中...</div></td></tr></tbody></table></div></div>`;adminLoadDepts();}
+async function adminLoadDepts(){try{const r=await fetch('/api/departments'),d=await r.json();if(Array.isArray(d)){let h='';d.forEach(dept=>{h+=`<tr><td style="font-weight:600">${dept.id}</td><td style="font-weight:600;color:var(--primary)">${dept.name}</td><td style="color:var(--text-secondary);font-size:12px">${dept.created_at?dept.created_at.split(' ')[0]:''}</td><td><div class="action-btns"><button class="btn btn-blue btn-sm" onclick="adminEditDeptModal(${dept.id},'${dept.name}')">编辑</button><button class="btn btn-red btn-sm" onclick="adminDelDept(${dept.id},'${dept.name}')">删除</button></div></td></tr>`});document.getElementById('deptTableBody').innerHTML=h||'<tr><td colspan="4"><div class="empty-text">暂无部门</div></td></tr>'}else{showToast(d.error||'加载失败','error')}}catch(e){showToast('加载失败','error')}}
+function adminShowDeptModal(){document.getElementById('modalTitle').textContent='➕ 添加部门';document.getElementById('modalBody').innerHTML=`<div class="form-group"><label>部门名称</label><input type="text" id="deptNameInput" placeholder="例如：研发部、财务部"></div>`;document.getElementById('modalFooter').innerHTML='<button class="btn btn-outline" onclick="closeModal()">取消</button><button class="btn btn-blue" onclick="adminAddDept()">💾 添加</button>';document.getElementById('genericModal').classList.add('show')}
+async function adminAddDept(){const name=document.getElementById('deptNameInput').value.trim();if(!name){showToast('请输入部门名称','warning');return}try{const r=await fetch('/api/departments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name})}),d=await r.json();if(d.success){showToast('部门添加成功','success');closeModal();adminLoadDepts()}else showToast(d.message||'添加失败','error')}catch(e){showToast('添加失败','error')}}
+function adminEditDeptModal(id,name){document.getElementById('modalTitle').textContent='✏️ 编辑部门';document.getElementById('modalBody').innerHTML=`<input type="hidden" id="deptEditId" value="${id}"><div class="form-group"><label>部门名称</label><input type="text" id="deptNameInput" value="${name}"></div>`;document.getElementById('modalFooter').innerHTML='<button class="btn btn-outline" onclick="closeModal()">取消</button><button class="btn btn-blue" onclick="adminSaveDept()">💾 保存</button>';document.getElementById('genericModal').classList.add('show')}
+async function adminSaveDept(){const id=document.getElementById('deptEditId').value,name=document.getElementById('deptNameInput').value.trim();if(!name){showToast('请输入部门名称','warning');return}try{const r=await fetch(`/api/departments/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({name})}),d=await r.json();if(d.success){showToast('部门更新成功','success');closeModal();adminLoadDepts()}else showToast(d.message||'更新失败','error')}catch(e){showToast('更新失败','error')}}
+async function adminDelDept(id,name){if(!confirm(`确定删除部门"${name}"？`))return;try{const r=await fetch(`/api/departments/${id}`,{method:'DELETE'}),d=await r.json();if(d.success){showToast('部门删除成功','success');adminLoadDepts()}else showToast(d.message||'删除失败','error')}catch(e){showToast('删除失败','error')}}
+
+// ==================== 系统监控 ====================
+let uptimeInterval=null;
+async function renderAdminMonitor(){
+    if(uptimeInterval){clearInterval(uptimeInterval);uptimeInterval=null}
+    document.getElementById('adminContent').innerHTML=`<div class="panel"><div class="panel-toolbar"><h2>🖥️ 系统监控</h2></div><div class="loading-text">加载中...</div></div>`;
+    try{const r=await fetch('/api/system/info'),d=await r.json();if(!d.success)return;const s=d.system;
+        document.getElementById('adminContent').innerHTML=`<div class="stats-row">
+            <div class="stat-card"><div class="stat-icon-box blue">⏱️</div><div><div class="stat-num" style="font-size:22px" id="liveUptime">${s.uptime_display}</div><div class="stat-label">运行时长</div></div></div>
+            <div class="stat-card"><div class="stat-icon-box green">📡</div><div><div class="stat-num">${s.request_count}</div><div class="stat-label">请求总数</div></div></div>
+            <div class="stat-card"><div class="stat-icon-box orange">📝</div><div><div class="stat-num">${s.log_count}</div><div class="stat-label">操作日志</div></div></div>
+            <div class="stat-card"><div class="stat-icon-box purple">⏳</div><div><div class="stat-num">${s.pending_feedback}</div><div class="stat-label">待处理反馈</div></div></div>
+        </div>
+        <div class="panel"><div class="panel-toolbar"><h2>📊 数据库状态</h2></div>
+        <div class="table-wrap"><table><thead><tr><th>表名</th><th>记录数</th><th>状态</th></tr></thead><tbody>${s.db_tables.map(t=>`<tr><td style="font-weight:600;color:var(--primary)">${t.name}</td><td>${t.rows||0}</td><td><span class="badge badge-green">正常</span></td></tr>`).join('')}</tbody></table></div></div>
+        <div class="panel" style="margin-top:24px"><div class="panel-toolbar"><h2>🔧 系统信息</h2></div>
+        <div style="padding:20px 24px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="detail-row"><span class="detail-label">启动时间</span><span class="detail-value">${s.start_time}</span></div>
+        <div class="detail-row"><span class="detail-label">用户总数</span><span class="detail-value">${s.user_count}</span></div>
+        <div class="detail-row"><span class="detail-label">新闻总数</span><span class="detail-value">${s.news_count}</span></div>
+        <div class="detail-row"><span class="detail-label">待处理</span><span class="detail-value">${s.pending_feedback}</span></div>
+        </div></div>`;
+        // 实时自增运行时长
+        let seconds=s.uptime_seconds;
+        uptimeInterval=setInterval(()=>{
+            seconds++;
+            const h=Math.floor(seconds/3600),m=Math.floor((seconds%3600)/60),sec=seconds%60;
+            const el=document.getElementById('liveUptime');if(el)el.textContent=`${h}h ${m}m ${sec}s`;
+            else clearInterval(uptimeInterval);
+        },1000);
+    }catch(e){}}
+
+// ==================== 系统设置 ====================
+function renderAdminSettings(){
+    const siteName=localStorage.getItem('gov_site_name')||'政务数字门户平台';
+    document.getElementById('adminContent').innerHTML=`
+        <div class="panel" style="margin-bottom:24px"><div class="panel-toolbar"><h2>⚙️ 站点配置</h2></div>
+        <div style="padding:24px;max-width:420px">
+            <div class="form-group"><label>站点名称</label><input type="text" id="siteName" value="${siteName}"></div>
+            <button class="btn btn-blue" onclick="adminSaveSiteConfig()" style="width:100%">💾 保存站点配置</button>
+        </div></div>
+        <div class="panel"><div class="panel-toolbar"><h2>🔒 修改管理员密码</h2></div>
+        <div style="padding:24px;max-width:420px">
+            <div class="form-group"><label>原密码</label><input type="password" id="adminOldPw" placeholder="请输入原密码"></div>
+            <div class="form-group"><input type="password" id="adminNewPw" placeholder="新密码（至少6位）"></div>
+            <div class="form-group"><input type="password" id="adminConfirmPw" placeholder="确认新密码"></div>
+            <button class="btn btn-blue" onclick="adminChangePassword()" style="width:100%">🔒 修改密码</button>
+        </div></div>`;
+}
+function adminSaveSiteConfig(){const n=document.getElementById('siteName').value.trim();if(!n){showToast('请输入站点名称','warning');return}localStorage.setItem('gov_site_name',n);document.querySelector('#appShell .sidebar .brand .name').textContent=n;showToast('站点配置已保存','success')}
+
+// 页面加载时恢复站点名称
+(function(){const n=localStorage.getItem('gov_site_name');if(n){const el=document.querySelector('#appShell .sidebar .brand .name');if(el)el.textContent=n}})();
+async function adminChangePassword(){
+    const oldPw=document.getElementById('adminOldPw').value,newPw=document.getElementById('adminNewPw').value,confirmPw=document.getElementById('adminConfirmPw').value;
+    if(!oldPw||!newPw){showToast('请填写完整','warning');return}
+    if(newPw!==confirmPw){showToast('两次密码不一致','warning');return}
+    if(newPw.length<6){showToast('新密码至少6位','warning');return}
+    try{const r=await fetch('/api/change_password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({old_password:oldPw,new_password:newPw})}),d=await r.json();if(d.success){showToast('密码修改成功','success');document.getElementById('adminOldPw').value='';document.getElementById('adminNewPw').value='';document.getElementById('adminConfirmPw').value=''}else showToast(d.message||'修改失败','error')}catch(e){showToast('修改失败','error')}}
+
+// ==================== 新闻导出 ====================
+async function adminExportNewsData(){try{const r=await fetch('/api/news/export'),news=await r.json();if(news.error)return;const hd='ID,标题,分类,作者,状态,发布时间,内容',rows=news.map(n=>[n.id,n.title,n.category,n.author||'',n.status,n.publish_time||'',(n.content||'').replace(/,/g,'，')]),csv=[hd,...rows.map(r=>r.join(','))].join('\n'),blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}),l=document.createElement('a');l.href=URL.createObjectURL(blob);l.download=`news_${new Date().toISOString().split('T')[0]}.csv`;document.body.appendChild(l);l.click();document.body.removeChild(l);showToast('导出成功','success')}catch(e){showToast('导出失败','error')}}
+
+async function adminExportFeedback(){try{const t=document.getElementById('feedbackTypeFilter')?.value||'',s=document.getElementById('feedbackStatusFilter')?.value||'',r=await fetch(`/api/feedback?per_page=9999&type=${encodeURIComponent(t)}&status=${encodeURIComponent(s)}`),d=await r.json();if(d.error)return;const hd='ID,姓名,电话,类型,内容,状态,时间,回复',rows=d.feedback.map(x=>[x.id,x.name,x.phone||'',x.type,(x.content||'').replace(/,/g,'，'),x.status==='pending'?'待处理':'已处理',x.create_time||'',(x.reply||'').replace(/,/g,'，')]),csv=[hd,...rows.map(r=>r.join(','))].join('\n'),blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}),l=document.createElement('a');l.href=URL.createObjectURL(blob);l.download=`feedback_${new Date().toISOString().split('T')[0]}.csv`;document.body.appendChild(l);l.click();document.body.removeChild(l);showToast('导出成功','success')}catch(e){showToast('导出失败','error')}}
+
+// ==================== Session 超时提醒 ====================
+let idleSeconds=0,idleTimer=null;
+function resetIdleTimer(){idleSeconds=0;if(!idleTimer)idleTimer=setInterval(()=>{idleSeconds++;if(idleSeconds===1500)showToast('⏰ 您已空闲25分钟，即将自动退出...','warning');if(idleSeconds>=1800){clearInterval(idleTimer);idleTimer=null;doLogout();showToast('已自动退出登录','warning')}},1000)}
+document.addEventListener('mousemove',resetIdleTimer);document.addEventListener('keydown',resetIdleTimer);document.addEventListener('click',resetIdleTimer);resetIdleTimer();
+
+// ==================== 注册 ====================
+async function loadDeptOptions(){try{const r=await fetch('/api/departments/public');const depts=await r.json();if(Array.isArray(depts))return depts.map(d=>`<option value="${d.name}">${d.name}</option>`).join('');return''}catch(e){return''}}
+function showRegisterModal(){
+    loadDeptOptions().then(deptOptions=>{
+        document.getElementById('modalTitle').textContent='📝 注册新账号';
+        document.getElementById('modalBody').innerHTML=`<div class="form-group"><label>用户名 <span style="color:#ef4444">*</span></label><input type="text" id="regUsername" placeholder="请输入用户名"></div><div class="form-group"><label>密码 <span style="color:#ef4444">*</span></label><input type="password" id="regPassword" placeholder="至少6位"></div><div class="form-group"><label>确认密码 <span style="color:#ef4444">*</span></label><input type="password" id="regConfirmPw" placeholder="再次输入密码"></div><div class="form-group"><label>姓名</label><input type="text" id="regName" placeholder="请输入姓名（选填）"></div><div class="form-group"><label>邮箱</label><input type="email" id="regEmail" placeholder="请输入邮箱（选填）"></div><div class="form-group"><label>电话</label><input type="text" id="regPhone" placeholder="请输入电话（选填）"></div><div class="form-group"><label>部门</label><select id="regDepartment"><option value="">请选择部门（选填）</option>${deptOptions}</select></div>`;
+        document.getElementById('modalFooter').innerHTML='<button class="btn btn-outline" onclick="closeModal()">取消</button><button class="btn btn-blue" onclick="doRegister()">📝 注册</button>';
+        document.getElementById('genericModal').classList.add('show');
+    });
+}
+async function doRegister(){
+    const username=document.getElementById('regUsername').value.trim(),password=document.getElementById('regPassword').value,confirmPw=document.getElementById('regConfirmPw').value,name=document.getElementById('regName').value.trim(),email=document.getElementById('regEmail').value.trim(),phone=document.getElementById('regPhone').value.trim(),department=document.getElementById('regDepartment').value;
+    if(!username||!password){showToast('请填写用户名和密码','warning');return}
+    if(password!==confirmPw){showToast('两次密码不一致','warning');return}
+    if(password.length<6){showToast('密码至少6位','warning');return}
+    try{const r=await fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password,name,email,phone,department})}),d=await r.json();if(d.success){showToast('注册成功，请登录','success');closeModal();document.getElementById('loginUsername').value=username;document.getElementById('loginPassword').value=''}else showToast(d.message||'注册失败','error')}catch(e){showToast('注册失败','error')}}
+
+// ==================== 管理员-通知公告 ====================
+async function renderAdminAnnouncements(){
+    document.getElementById('adminContent').innerHTML=`<div class="panel"><div class="panel-toolbar"><h2>📢 通知公告</h2><button class="btn btn-blue" onclick="adminAddAnnouncement()">➕ 发布公告</button></div><div class="table-wrap"><table><thead><tr><th>ID</th><th>标题</th><th>内容</th><th>置顶</th><th>发布时间</th><th>操作</th></tr></thead><tbody id="annTableBody"><tr><td colspan="6"><div class="loading-text">加载中...</div></td></tr></tbody></table></div></div>`;adminLoadAnnouncements();}
+async function adminLoadAnnouncements(){try{const r=await fetch('/api/announcements'),d=await r.json();if(d.error)return;let h='';d.announcements.forEach(a=>{h+=`<tr><td style="font-weight:600">${a.id}</td><td style="font-weight:600;color:var(--primary)">${a.is_top?'📌 ':''}${a.title}</td><td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.content||''}</td><td><span class="badge ${a.is_top?'badge-orange':'badge-gray'}">${a.is_top?'置顶':'普通'}</span></td><td style="color:var(--text-secondary)">${a.created_at?a.created_at.split(' ')[0]:''}</td><td><div class="action-btns"><button class="btn btn-blue btn-sm" onclick="adminEditAnnouncement(${a.id})">编辑</button><button class="btn btn-red btn-sm" onclick="adminDelAnnouncement(${a.id})">删除</button></div></td></tr>`});document.getElementById('annTableBody').innerHTML=h||'<tr><td colspan="6"><div class="empty-text">暂无公告</div></td></tr>'}catch(e){showToast('加载失败','error')}}
+function adminAddAnnouncement(){document.getElementById('modalTitle').textContent='📢 发布公告';document.getElementById('modalBody').innerHTML=`<input type="hidden" id="annId" value=""><div class="form-group"><label>标题</label><input type="text" id="annTitle"></div><div class="form-group"><label>内容</label><textarea id="annContent"></textarea></div><div class="form-group"><label><input type="checkbox" id="annIsTop" style="width:auto;margin-right:6px">置顶公告</label></div>`;document.getElementById('modalFooter').innerHTML='<button class="btn btn-outline" onclick="closeModal()">取消</button><button class="btn btn-blue" onclick="adminSaveAnnouncement()">💾 发布</button>';document.getElementById('genericModal').classList.add('show')}
+async function adminEditAnnouncement(id){try{const r=await fetch('/api/announcements'),d=await r.json();const a=d.announcements.find(x=>x.id===id);if(!a)return;document.getElementById('modalTitle').textContent='✏️ 编辑公告';document.getElementById('modalBody').innerHTML=`<input type="hidden" id="annId" value="${a.id}"><div class="form-group"><label>标题</label><input type="text" id="annTitle" value="${a.title||''}"></div><div class="form-group"><label>内容</label><textarea id="annContent">${a.content||''}</textarea></div><div class="form-group"><label><input type="checkbox" id="annIsTop" ${a.is_top?'checked':''} style="width:auto;margin-right:6px">置顶公告</label></div>`;document.getElementById('modalFooter').innerHTML='<button class="btn btn-outline" onclick="closeModal()">取消</button><button class="btn btn-blue" onclick="adminSaveAnnouncement()">💾 更新</button>';document.getElementById('genericModal').classList.add('show')}catch(e){}}
+async function adminSaveAnnouncement(){const id=document.getElementById('annId').value,title=document.getElementById('annTitle').value,content=document.getElementById('annContent').value,isTop=document.getElementById('annIsTop').checked?1:0;if(!title){showToast('请输入标题','warning');return}try{const url=id?`/api/announcements/${id}`:'/api/announcements',method=id?'PUT':'POST',r=await fetch(url,{method,headers:{'Content-Type':'application/json'},body:JSON.stringify({title,content,is_top:isTop})}),d=await r.json();if(d.success){showToast(id?'更新成功':'发布成功','success');closeModal();adminLoadAnnouncements()}else showToast(d.message||'操作失败','error')}catch(e){showToast('操作失败','error')}}
+async function adminDelAnnouncement(id){if(!confirm('确定删除？'))return;try{await fetch(`/api/announcements/${id}`,{method:'DELETE'});showToast('删除成功','success');adminLoadAnnouncements()}catch(e){showToast('删除失败','error')}}
+
+// ==================== 用户前台 ====================
+let userCurrentPage=1,userMyFbPage=1;
+
+function userShow(section){
+    currentUserSection=section;
+    const titles={home:'🏠 首页门户',blog:'📝 我的博客',friends:'👥 好友管理',feedback:'📋 我的反馈',profile:'👤 个人信息',password:'🔒 修改密码'};
+    updateFooter();
+    document.getElementById('userPageTitle').textContent=titles[section]||'';
+    document.querySelectorAll('#userShell .unav-item').forEach(b=>b.classList.remove('active'));
+    const nav=document.getElementById('unav'+section.charAt(0).toUpperCase()+section.slice(1));if(nav)nav.classList.add('active');
+    if(section==='home')renderUserHome();
+    if(section==='blog')renderUserBlogs();
+    if(section==='friends')renderUserFriends();
+    if(section==='feedback')renderUserFeedback();
+    if(section==='profile')renderUserProfile();
+    if(section==='password')renderUserChangePassword();
+}
+
+async function loadUserPortal(){
+    try{const r=await fetch('/api/user/profile'),d=await r.json();if(d.success&&d.profile){document.getElementById('userDisplayName').textContent=d.profile.name||d.profile.username;document.getElementById('uSideName').textContent=d.profile.name||d.profile.username;document.getElementById('uSideAvatar').textContent=(d.profile.name||d.profile.username).charAt(0)}}catch(e){}
+    userShow('home');
+    // 异步加载公告
+    fetch('/api/public/announcements').then(r=>r.json()).then(d=>{if(d.announcements&&d.announcements.length>0){const txt=d.announcements.map(a=>'📌 '+a.title+'：'+a.content).join(' ｜ ');const el=document.getElementById('announceText');if(el)el.textContent=txt}}).catch(()=>{});
+}
+
+// ==================== 用户首页 ====================
+async function renderUserHome(){
+    document.getElementById('userContent').innerHTML=`
+        <div class="banner" id="uBanner"><div class="loading-text" style="color:#fff;display:flex;align-items:center;justify-content:center;height:100%">加载中...</div></div>
+        <div class="hero-banner"><h1>欢迎来到政务数字门户</h1><p>一站式政务服务，让办事更便捷、更高效</p></div>
+        <div class="announce-bar"><span class="announce-icon">📢</span><span class="announce-text" id="announceText">欢迎使用政务数字门户平台！如有疑问请拨打服务热线 12345 ｜ 最新政策法规已更新，请前往新闻动态查看 ｜ 在线反馈功能已上线，欢迎提交您的宝贵意见</span></div>
+        <div class="stats-row">
+            <div class="stat-card"><div class="stat-icon-box blue">📰</div><div><div class="stat-num" id="uStatNews">0</div><div class="stat-label">政务新闻</div></div></div>
+            <div class="stat-card"><div class="stat-icon-box green">⚙️</div><div><div class="stat-num" id="uStatServices">0</div><div class="stat-label">政务服务</div></div></div>
+            <div class="stat-card"><div class="stat-icon-box orange">📋</div><div><div class="stat-num" id="uStatFeedback">0</div><div class="stat-label">我的反馈</div></div></div>
+            <div class="stat-card"><div class="stat-icon-box purple">✅</div><div><div class="stat-num" id="uStatProcessed">0</div><div class="stat-label">已处理</div></div></div>
+        </div>
+        <div class="home-grid">
+            <div class="home-panel"><div class="home-panel-hd">📰 最新政务动态</div><div class="home-panel-bd" id="uNewsList"><div class="loading-text">加载中...</div></div></div>
+            <div class="home-panel"><div class="home-panel-hd">🔥 热门政务服务</div><div class="home-panel-bd" id="uServicesList"><div class="loading-text">加载中...</div></div></div>
+        </div>
+        <div class="home-grid" style="margin-top:24px">
+            <div class="home-panel"><div class="home-panel-hd">📝 最新博客</div><div class="home-panel-bd" id="uBlogHomeList"><div class="loading-text">加载中...</div></div></div>
+            <div class="home-panel"><div class="home-panel-hd">📢 最新公告</div><div class="home-panel-bd" id="uAnnounceList"><div class="loading-text">加载中...</div></div></div>
+        </div>
+        <div class="home-grid" style="margin-top:24px">
+            <div class="home-panel"><div class="home-panel-hd">🚀 快捷入口</div><div class="home-panel-bd" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                <div class="svc-card-mini" onclick="userShow('feedback')" style="border-color:#eef4ff;background:var(--card)">
+                    <span class="svc-icon-sm">📋</span><div><div class="svc-name-sm">我的反馈</div><div class="svc-desc-sm">查看反馈记录和回复</div></div>
+                </div>
+                <div class="svc-card-mini" onclick="userShow('profile')" style="border-color:#e6f7ee;background:var(--card)">
+                    <span class="svc-icon-sm">👤</span><div><div class="svc-name-sm">个人信息</div><div class="svc-desc-sm">查看和编辑个人资料</div></div>
+                </div>
+                <div class="svc-card-mini" onclick="userShow('password')" style="border-color:#fff7ed;background:var(--card)">
+                    <span class="svc-icon-sm">🔒</span><div><div class="svc-name-sm">修改密码</div><div class="svc-desc-sm">定期更换账户密码</div></div>
+                </div>
+                <div class="svc-card-mini" onclick="scrollToFeedbackForm()" style="border-color:#f3f0ff;background:var(--card)">
+                    <span class="svc-icon-sm">✉️</span><div><div class="svc-name-sm">在线反馈</div><div class="svc-desc-sm">提交意见或建议</div></div>
+                </div>
+            </div></div>
+            <div class="home-panel"><div class="home-panel-hd">✉️ 在线反馈</div><div class="home-panel-bd" id="feedbackFormArea">
+                <div class="form-group"><input type="text" id="ufbPhone" placeholder="联系电话"></div>
+                <div class="form-group"><select id="ufbType"><option value="咨询">咨询</option><option value="投诉">投诉</option><option value="建议">建议</option><option value="表扬">表扬</option></select></div>
+                <div class="form-group"><textarea id="ufbContent" placeholder="请输入您的反馈内容..." style="min-height:80px"></textarea></div>
+                <button class="btn btn-blue" onclick="userSubmitFeedback()" style="width:100%">📨 提交反馈</button>
+            </div></div>
+        </div>`;
+    try{
+        const n=await(await fetch('/api/news?per_page=1')).json(),s=await(await fetch('/api/services')).json();
+        const mr=await fetch('/api/user/my_feedback');const mf=await mr.json();
+        document.getElementById('uStatNews').textContent=n.total||0;
+        document.getElementById('uStatServices').textContent=Array.isArray(s)?s.length:(s.services?s.services.length:0);
+        document.getElementById('uStatFeedback').textContent=mf.total||0;
+        document.getElementById('uStatProcessed').textContent=mf.feedback?mf.feedback.filter(x=>x.status==='processed').length:0;
+        const n2=await(await fetch('/api/news?per_page=6')).json();let nh='';if(n2.news)n2.news.forEach(x=>{nh+=`<div class="news-item" onclick="userViewNews(${x.id})"><span class="news-cat">${x.category}</span><div class="news-title">${x.title}</div><div class="news-meta"><span>${x.author||''}</span><span>${x.publish_time?x.publish_time.split(' ')[0]:''}</span></div></div>`});document.getElementById('uNewsList').innerHTML=nh||'<div class="empty-text">暂无新闻</div>';
+    }catch(e){}
+    // 加载服务
+    fetch('/api/services').then(r=>r.json()).then(s=>{const list=Array.isArray(s)?s:(s.services||[]);let sh='';list.forEach(x=>{sh+=`<div class="svc-card-mini" onclick="userViewService(${x.id})"><span class="svc-icon-sm">${x.icon||'📋'}</span><div><div class="svc-name-sm">${x.name}</div><div class="svc-desc-sm">${x.description||''}</div></div></div>`});document.getElementById('uServicesList').innerHTML=sh||'<div class="empty-text">暂无服务</div>'}).catch(()=>{});
+    // 加载博客和公告
+    loadBlogHome();
+    fetch('/api/public/announcements').then(r=>r.json()).then(d=>{if(d.announcements){let ah='';d.announcements.forEach(a=>{ah+=`<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:13px"><span style="color:var(--primary);font-weight:600">${a.is_top?'📌 ':''}${a.title}</span><div style="color:var(--text-secondary);font-size:12px;margin-top:2px">${a.content||''}</div></div>`});document.getElementById('uAnnounceList').innerHTML=ah||'<div class="empty-text">暂无公告</div>'}}).catch(()=>{});
+    // Banner
+    fetch('/api/news?per_page=5').then(r=>r.json()).then(d=>{if(d.news)renderBanner('uBanner',d.news.filter(n=>n.image_url))}).catch(()=>{});
+}
+
+function scrollToFeedbackForm(){userShow('home');setTimeout(()=>{const el=document.getElementById('feedbackFormArea');if(el)el.scrollIntoView({behavior:'smooth',block:'center'})},200)}
+
+async function userViewNews(id){try{const r=await fetch(`/api/news/${id}`),d=await r.json();if(d.error)return;document.getElementById('modalTitle').textContent='📰 '+d.title;document.getElementById('modalBody').innerHTML=`<div class="detail-row"><span class="detail-label">分类</span><span class="detail-value"><span class="badge badge-blue">${d.category}</span></span></div><div class="detail-row"><span class="detail-label">作者</span><span class="detail-value">${d.author||'-'}</span></div><div class="detail-row"><span class="detail-label">时间</span><span class="detail-value">${d.publish_time||'-'}</span></div><div style="margin-top:14px;padding:16px;background:var(--detail-bg);border-radius:8px;font-size:14px;line-height:1.9">${d.content}</div>`;document.getElementById('modalFooter').innerHTML='<button class="btn btn-outline" onclick="closeModal()">关闭</button>';document.getElementById('genericModal').classList.add('show')}catch(e){}}
+
+async function userViewService(id){try{const r=await fetch('/api/services'),s=await r.json();const list=Array.isArray(s)?s:(s.services||[]);const x=list.find(v=>v.id===id);if(!x)return;document.getElementById('modalTitle').textContent='⚙️ '+x.name;document.getElementById('modalBody').innerHTML=`<div style="text-align:center;margin-bottom:16px"><div style="font-size:48px">${x.icon||'📋'}</div></div><div class="detail-row"><span class="detail-label">名称</span><span class="detail-value" style="font-weight:600;color:var(--primary)">${x.name}</span></div><div class="detail-row"><span class="detail-label">类型</span><span class="detail-value"><span class="badge badge-orange">${x.type||'其他'}</span></span></div><div style="margin-top:14px;padding:16px;background:var(--detail-bg);border-radius:8px;font-size:14px;line-height:1.9">${x.description||'暂无详细描述'}</div>`;document.getElementById('modalFooter').innerHTML='<button class="btn btn-outline" onclick="closeModal()">关闭</button>';document.getElementById('genericModal').classList.add('show')}catch(e){}}
+async function userSubmitFeedback(){const phone=document.getElementById('ufbPhone').value,type=document.getElementById('ufbType').value,content=document.getElementById('ufbContent').value,name=document.getElementById('userDisplayName').textContent;if(!content){showToast('请输入反馈内容','warning');return}try{const r=await fetch('/api/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,phone,type,content})}),d=await r.json();if(d.success){showToast('反馈提交成功','success');document.getElementById('ufbPhone').value='';document.getElementById('ufbContent').value='';renderUserHome()}else showToast(d.message||'提交失败','error')}catch(e){showToast('提交失败','error')}}
+
+// ==================== 表情选择器 ====================
+const EMOJI_LIST=['😀','😂','🤣','😍','😎','😭','😡','👍','👎','❤️','🔥','⭐','🎉','💯','✨','🌟','💪','🙏','🤝','👏','🎊','🎈','🌹','🌸','💐','🍀','🎵','🎶','📢','💡','🔔','📌','✏️','📷','💻','🏠','🚀','💎','🌈','☀️','⚡'];
+let blogCurrentPage=1,blogCurrentId=null;
+
+// ==================== 我的博客（用户） ====================
+async function renderUserBlogs(){
+    document.getElementById('userContent').innerHTML=`<div class="panel"><div class="panel-toolbar"><h2>📝 我的博客</h2><button class="btn btn-blue" onclick="showBlogEditor()">✍️ 写博客</button></div><div id="blogList"><div class="loading-text">加载中...</div></div><div class="pager" id="blogPager"></div></div>`;loadUserBlogList();}
+async function loadUserBlogList(page=1){blogCurrentPage=page;try{const r=await fetch(`/api/my_blogs?page=${page}&per_page=8`),d=await r.json();if(d.error){showToast(d.error,'error');return}let h='';if(d.blogs&&d.blogs.length>0){d.blogs.forEach(b=>{h+=`<div class="blog-card" onclick="viewBlog(${b.id})"><div class="blog-card-hd"><span class="blog-card-title">${b.title}</span><span class="blog-card-badges"><span class="badge badge-blue">❤️ ${b.likes||0}</span><span class="badge badge-gray">💬 ${b.comment_count||0}</span><span class="badge badge-green">👁 ${b.views||0}</span></span></div><div class="blog-card-body">${b.content.replace(/<[^>]*>/g,'').substring(0,120)}${b.content.length>120?'...':''}</div><div class="blog-card-ft"><span>${b.created_at?b.created_at.split(' ')[0]:''}</span><button class="btn btn-red btn-sm" onclick="event.stopPropagation();delBlog(${b.id})">删除</button></div></div>`})}else h='<div class="empty-text">还没有博客，快去写一篇吧！</div>';document.getElementById('blogList').innerHTML=h;let ph='';if(d.total>8){let pp=Math.ceil(d.total/8);for(let i=1;i<=pp;i++)ph+=`<button onclick="loadUserBlogList(${i})" ${i===page?'disabled':''}>${i}</button>`;document.getElementById('blogPager').innerHTML=ph}}catch(e){showToast('加载失败','error')}}
+
+function showBlogEditor(id){if(id){fetch(`/api/blogs/${id}`).then(r=>r.json()).then(d=>{if(d.blog)openBlogEditor(d.blog)})}else openBlogEditor(null)}
+function openBlogEditor(blog){
+    document.getElementById('modalTitle').textContent=blog?'✏️ 编辑博客':'✍️ 写博客';
+    document.getElementById('modalBody').innerHTML=`<input type="hidden" id="blogEditId" value="${blog?blog.id:''}"><div class="form-group"><label>标题</label><input type="text" id="blogTitle" value="${blog?blog.title:''}" placeholder="请输入博客标题"></div><div class="form-group"><label>内容</label><textarea id="blogContent" placeholder="分享你的想法..." style="min-height:200px;font-size:14px;line-height:1.8">${blog?blog.content:''}</textarea><div class="emoji-bar" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;padding:8px;background:var(--detail-bg);border-radius:8px;max-height:140px;overflow-y:auto">${EMOJI_LIST.map(e=>`<span style="cursor:pointer;font-size:20px;padding:2px 4px;border-radius:4px;transition:background .2s" onmouseover="this.style.background='var(--primary-light)'" onmouseout="this.style.background='transparent'" onclick="insertEmoji('${e}')">${e}</span>`).join('')}</div></div><div class="form-group"><label>图片</label><input type="file" id="blogImageInput" accept="image/*" onchange="uploadBlogImage()" style="font-size:13px"><div id="blogImagePreview" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:8px">${blog&&blog.images?blog.images.split(',').filter(u=>u).map(u=>`<div style="position:relative;display:inline-block"><img src="${u}" style="max-width:120px;max-height:120px;border-radius:6px;object-fit:cover"><button onclick="removeBlogImage(this,'${u}')" style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:#ef4444;color:#fff;border:none;cursor:pointer;font-size:12px;line-height:1">×</button></div>`).join(''):''}</div></div>`;
+    document.getElementById('modalFooter').innerHTML='<button class="btn btn-outline" onclick="closeModal()">取消</button><button class="btn btn-blue" onclick="saveBlog()">💾 发布</button>';
+    document.getElementById('genericModal').classList.add('show');
+    blogImages=[];
+    if(blog&&blog.images)blogImages=blog.images.split(',').filter(u=>u);
+}
+let blogImages=[];
+function insertEmoji(emoji){const ta=document.getElementById('blogContent');if(!ta)return;const s=ta.selectionStart;ta.value=ta.value.slice(0,s)+emoji+ta.value.slice(s);ta.selectionStart=ta.selectionEnd=s+emoji.length;ta.focus()}
+function uploadBlogImage(){const f=document.getElementById('blogImageInput').files[0];if(!f)return;const r=new FileReader();r.onload=async e=>{try{const res=await fetch('/api/upload',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:e.target.result})}),d=await res.json();if(d.success){blogImages.push(d.url);document.getElementById('blogImagePreview').insertAdjacentHTML('beforeend',`<div style="position:relative;display:inline-block"><img src="${d.url}" style="max-width:120px;max-height:120px;border-radius:6px;object-fit:cover"><button onclick="removeBlogImage(this,'${d.url}')" style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:#ef4444;color:#fff;border:none;cursor:pointer;font-size:12px;line-height:1">×</button></div>`)}else showToast('上传失败','error')}catch(e){showToast('上传失败','error')}};r.readAsDataURL(f)}
+function removeBlogImage(btn,url){btn.parentElement.remove();blogImages=blogImages.filter(u=>u!==url)}
+async function saveBlog(){const id=document.getElementById('blogEditId').value,title=document.getElementById('blogTitle').value.trim(),content=document.getElementById('blogContent').value.trim();if(!title||!content){showToast('标题和内容不能为空','warning');return}const body={title,content,images:blogImages.join(',')};try{let r;if(id){r=await fetch(`/api/blogs/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})}else{r=await fetch('/api/blogs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})}const d=await r.json();if(d.success){showToast(id?'更新成功':'发布成功','success');closeModal();loadUserBlogList(blogCurrentPage);if(currentUserSection==='home')loadBlogHome()}else showToast(d.message||'操作失败','error')}catch(e){showToast('操作失败','error')}}
+
+async function viewBlog(id){blogCurrentId=id;try{const r=await fetch(`/api/blogs/${id}`),d=await r.json();if(d.error){showToast(d.error,'error');return}const b=d.blog,cs=d.comments;let imgHtml='';if(b.images)imgHtml=b.images.split(',').filter(u=>u).map(u=>`<img src="${u}" style="max-width:100%;border-radius:8px;margin:8px 0">`).join('');
+document.getElementById('modalTitle').textContent=b.title;
+let ch='';if(cs&&cs.length>0)cs.forEach(c=>{ch+=`<div style="padding:10px 0;border-bottom:1px solid var(--border)"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-weight:600;color:var(--primary);font-size:13px">${c.username}</span><span style="font-size:11px;color:var(--text-secondary)">${formatDateTime(c.created_at)}</span>${(document.getElementById('userDisplayName')?.textContent===c.username)||(currentRole==='admin')?`<button class="btn btn-red btn-sm" onclick="delBlogComment(${b.id},${c.id})">×</button>`:''}</div><div style="font-size:13px;line-height:1.7">${c.content}</div></div>`});
+document.getElementById('modalBody').innerHTML=`<div style="max-height:60vh;overflow-y:auto"><div style="font-size:14px;line-height:1.9;margin-bottom:16px">${b.content}</div>${imgHtml}<div style="display:flex;gap:16px;align-items:center;margin:12px 0;padding:10px 0;border-top:1px solid var(--border);color:var(--text-secondary);font-size:12px"><span>✍️ ${b.username}</span><span>📅 ${formatDateTime(b.created_at)}</span><span>👁 ${b.views}</span><span style="cursor:pointer;color:#ef4444" onclick="toggleBlogLike(${b.id})">❤️ <span id="blogLikeCount">${b.likes||0}</span></span></div><div style="margin-top:16px"><div style="font-weight:600;margin-bottom:8px;font-size:14px">💬 评论 (${cs?cs.length:0})</div><div>${ch||'<div style="color:var(--text-secondary);font-size:13px;padding:12px 0">暂无评论</div>'}</div></div></div>`;
+document.getElementById('modalFooter').innerHTML=`<div style="display:flex;gap:8px;width:100%"><input type="text" id="blogCommentInput" placeholder="写下你的评论..." style="flex:1" onkeydown="if(event.key==='Enter')addBlogComment(${b.id})"><button class="btn btn-blue btn-sm" onclick="addBlogComment(${b.id})">发送</button></div>`;
+document.getElementById('genericModal').classList.add('show')}catch(e){showToast('加载失败','error')}}
+async function addBlogComment(blogId){const input=document.getElementById('blogCommentInput');if(!input)return;const c=input.value.trim();if(!c){showToast('请输入评论内容','warning');return}try{const r=await fetch(`/api/blogs/${blogId}/comments`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({content:c})}),d=await r.json();if(d.success){showToast('评论成功','success');viewBlog(blogId)}else showToast(d.message||'评论失败','error')}catch(e){showToast('评论失败','error')}}
+async function delBlogComment(blogId,commentId){if(!confirm('确定删除该评论？'))return;try{const r=await fetch(`/api/blogs/${blogId}/comments/${commentId}`,{method:'DELETE'}),d=await r.json();if(d.success){showToast('评论已删除','success');viewBlog(blogId)}else showToast(d.message||'删除失败','error')}catch(e){showToast('删除失败','error')}}
+async function toggleBlogLike(blogId){try{const r=await fetch(`/api/blogs/${blogId}/like`,{method:'POST'}),d=await r.json();if(d.success){const el=document.getElementById('blogLikeCount');if(el)el.textContent=parseInt(el.textContent)+(d.liked?1:-1);showToast(d.message,'success')}}catch(e){}}
+async function delBlog(id){if(!confirm('确定删除该博客？'))return;try{const r=await fetch(`/api/blogs/${id}`,{method:'DELETE'}),d=await r.json();if(d.success){showToast('删除成功','success');loadUserBlogList(blogCurrentPage)}else showToast(d.message||'删除失败','error')}catch(e){showToast('删除失败','error')}}
+async function loadBlogHome(){try{const r=await fetch('/api/blogs?per_page=4'),d=await r.json();if(d.blogs){let h='';d.blogs.forEach(b=>{h+=`<div class="blog-card" onclick="viewBlog(${b.id})"><div class="blog-card-hd"><span class="blog-card-title">${b.title}</span><span class="blog-card-badges"><span class="badge badge-blue">❤️ ${b.likes||0}</span><span class="badge badge-gray">💬 ${b.comment_count||0}</span></span></div><div class="blog-card-body">${b.content.replace(/<[^>]*>/g,'').substring(0,100)}${b.content.length>100?'...':''}</div><div class="blog-card-ft"><span>✍️ ${b.username} · ${b.created_at?b.created_at.split(' ')[0]:''}</span></div></div>`});document.getElementById('uBlogHomeList').innerHTML=h||'<div class="empty-text">暂无博客</div>'}}catch(e){}}
+
+// ==================== 我的反馈 ====================
+async function renderUserFeedback(){
+    document.getElementById('userContent').innerHTML=`
+        <div class="panel"><div class="panel-toolbar"><h2>📋 我的反馈记录</h2><span style="font-size:13px;color:var(--text-secondary)">查看您提交的反馈及官方回复</span></div>
+        <div class="table-wrap"><table><thead><tr><th>ID</th><th>类型</th><th>内容</th><th>状态</th><th>时间</th><th>官方回复</th></tr></thead><tbody id="myFbTableBody"><tr><td colspan="6"><div class="loading-text">加载中...</div></td></tr></tbody></table></div>
+        <div class="pager" id="myFbPagination"><button onclick="userLoadMyFeedback(userMyFbPage-1)" disabled>上一页</button><span class="page-info">第1页/共1页</span><button onclick="userLoadMyFeedback(userMyFbPage+1)" disabled>下一页</button></div></div>`;
+    userLoadMyFeedback();
+}
+async function userLoadMyFeedback(page=1){
+    try{const r=await fetch(`/api/user/my_feedback?page=${page}&per_page=10`),d=await r.json();if(!d.success)return;userMyFbPage=page;let h='';d.feedback.forEach(x=>{h+=`<tr><td style="font-weight:600">${x.id}</td><td><span class="badge badge-orange">${x.type}</span></td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${x.content}</td><td><span class="badge ${x.status==='pending'?'badge-red':'badge-green'}">${x.status==='pending'?'待处理':'已处理'}</span></td><td style="color:var(--text-secondary)">${x.create_time?x.create_time.split(' ')[0]:''}</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-secondary)">${x.reply||'-'}</td></tr>`});document.getElementById('myFbTableBody').innerHTML=h||'<tr><td colspan="6"><div class="empty-text">暂无反馈记录</div></td></tr>';const p=document.getElementById('myFbPagination'),bs=p.querySelectorAll('button');bs[0].disabled=userMyFbPage<=1;bs[1].disabled=userMyFbPage>=d.total_pages;p.querySelector('.page-info').textContent=`第${userMyFbPage}页/共${d.total_pages||1}页`}catch(e){showToast('加载失败','error')}}
+
+// ==================== 个人信息 ====================
+async function renderUserProfile(){
+    document.getElementById('userContent').innerHTML=`<div class="loading-text">加载中...</div>`;
+    try{
+        const [profileRes, blogsRes]=await Promise.all([fetch('/api/user/profile'), fetch('/api/my_blogs?per_page=5')]);
+        const profile=await profileRes.json();
+        const blogs=await blogsRes.json();
+        if(!profile.success){document.getElementById('userContent').innerHTML='<div class="empty-text">加载失败</div>';return}
+        const u=profile.profile;
+        const deptOptions=await loadDeptOptions();
+        
+        // 计算统计数据
+        const blogStats={total:blogs.total||0, likes:0, comments:0};
+        (blogs.blogs||[]).forEach(b=>{blogStats.likes+=b.likes||0;blogStats.comments+=b.comment_count||0});
+        
+        // 构建博客列表
+        let blogList='';
+        if(blogs.blogs&&blogs.blogs.length>0){
+            blogList=blogs.blogs.map(b=>`
+                <div class="blog-card" onclick="viewBlog(${b.id})">
+                    <div class="blog-card-hd">
+                        <span class="blog-card-title">${b.title}</span>
+                        <span class="blog-card-badges">
+                            <span class="badge badge-blue">❤️ ${b.likes||0}</span>
+                            <span class="badge badge-gray">💬 ${b.comment_count||0}</span>
+                        </span>
+                    </div>
+                    <div class="blog-card-body">${b.content.replace(/<[^>]*>/g,'').substring(0,80)}${b.content.length>80?'...':''}</div>
+                    <div class="blog-card-ft"><span>${formatDateTime(b.created_at)}</span></div>
+                </div>
+            `).join('');
+        }else{
+            blogList='<div class="empty-text" style="text-align:center;padding:20px">还没有发布博客</div>';
+        }
+        
+        document.getElementById('userContent').innerHTML=`
+            <div class="panel">
+                <div style="display:flex;gap:24px;padding:24px;border-bottom:1px solid var(--border)">
+                    <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;flex-shrink:0">${(u.name||u.username).charAt(0)}</div>
+                    <div style="flex:1">
+                        <h2 style="margin:0;font-size:20px;color:var(--text)">${u.name||u.username}</h2>
+                        <p style="margin:4px 0;color:var(--text-secondary);font-size:13px">@${u.username} ${u.department?'· '+u.department:''}</p>
+                        <div style="display:flex;gap:20px;margin-top:12px">
+                            <div><span style="font-weight:700;color:var(--primary)">${blogStats.total}</span><span style="color:var(--text-secondary);font-size:12px;margin-left:4px">文章</span></div>
+                            <div><span style="font-weight:700;color:#ef4444">${blogStats.likes}</span><span style="color:var(--text-secondary);font-size:12px;margin-left:4px">获赞</span></div>
+                            <div><span style="font-weight:700;color:#3b82f6">${blogStats.comments}</span><span style="color:var(--text-secondary);font-size:12px;margin-left:4px">评论</span></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="padding:16px">
+                    <div class="panel-toolbar" style="padding:0;margin-bottom:16px">
+                        <h3 style="margin:0;font-size:15px">✏️ 我的文章</h3>
+                        <button class="btn btn-blue btn-sm" onclick="showBlogEditor()">+ 写博客</button>
+                    </div>
+                    <div id="profileBlogList">${blogList}</div>
+                </div>
+            </div>
+            
+            <div class="panel" style="margin-top:12px">
+                <div class="panel-toolbar"><h3>⚙️ 账户设置</h3></div>
+                <div style="padding:24px;max-width:400px">
+                    <div class="form-group"><label>用户名</label><input type="text" value="${u.username}" disabled style="background:var(--input-bg);color:var(--text-secondary)"></div>
+                    <div class="form-group"><label>姓名</label><input type="text" id="profileName" value="${u.name||''}"></div>
+                    <div class="form-group"><label>邮箱</label><input type="email" id="profileEmail" value="${u.email||''}"></div>
+                    <div class="form-group"><label>电话</label><input type="text" id="profilePhone" value="${u.phone||''}"></div>
+                    <div class="form-group"><label>部门</label><select id="profileDepartment"><option value="">请选择部门</option>${deptOptions}</select></div>
+                    <div style="display:flex;gap:12px;margin-top:16px">
+                        <div style="flex:1;padding:12px;background:var(--bg);border-radius:8px">
+                            <div style="font-size:11px;color:var(--text-secondary)">最后登录</div>
+                            <div style="font-size:12px;color:var(--text)">${formatDateTime(u.last_login_time)||'从未登录'}</div>
+                        </div>
+                        <div style="flex:1;padding:12px;background:var(--bg);border-radius:8px">
+                            <div style="font-size:11px;color:var(--text-secondary)">注册时间</div>
+                            <div style="font-size:12px;color:var(--text)">${formatDateTime(u.created_at)||'-'}</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-blue" onclick="userSaveProfile()" style="width:100%;margin-top:16px">💾 保存修改</button>
+                </div>
+            </div>
+        `;
+        document.getElementById('profileDepartment').value=u.department||'';
+    }catch(e){console.error(e);document.getElementById('userContent').innerHTML='<div class="empty-text">加载失败</div>'}
+}
+async function userSaveProfile(){
+    const name=document.getElementById('profileName').value,email=document.getElementById('profileEmail').value.trim(),phone=document.getElementById('profilePhone').value,department=document.getElementById('profileDepartment').value;
+    if(!name){showToast('请输入姓名','warning');return}
+    try{const r=await fetch('/api/user/profile',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,phone,department})}),d=await r.json();if(d.success){showToast('个人信息更新成功','success');document.getElementById('userDisplayName').textContent=name;document.getElementById('uSideName').textContent=name;document.getElementById('uSideAvatar').textContent=name.charAt(0);renderUserProfile()}else showToast(d.message||'更新失败','error')}catch(e){showToast('更新失败','error')}}
+
+// ==================== 好友管理 ====================
+async function renderUserFriends(){
+    document.getElementById('userContent').innerHTML=`<div class="panel"><div class="panel-toolbar"><h2>👥 好友管理</h2></div><div style="padding:16px 24px;display:flex;gap:8px"><input class="input" type="text" id="friendSearchInput" placeholder="输入好友用户名搜索..." style="flex:1"><button class="btn btn-blue" onclick="searchAndAddFriend()">➕ 添加好友</button></div><div id="friendSearchResults" style="padding:0 24px"></div><div id="friendList" style="padding:0 24px 24px"><div class="loading-text">加载中...</div></div></div>`;loadFriends();}
+async function loadFriends(){try{const r=await fetch('/api/friends'),d=await r.json();if(Array.isArray(d)){let h='';if(d.length===0)h='<div class="empty-text">还没有好友，快去添加吧！</div>';else d.forEach(f=>{h+=`<div style="display:flex;align-items:center;gap:12px;padding:12px;margin-bottom:8px;border-radius:8px;background:var(--bg);border:1px solid var(--border)"><div style="width:40px;height:40px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0">${(f.name||f.username).charAt(0)}</div><div style="flex:1"><div style="font-weight:600;color:var(--primary);font-size:14px">${f.username}</div><div style="font-size:12px;color:var(--text-secondary)">${f.name||''} ${f.department?('· '+f.department):''}</div></div><button class="btn btn-red btn-sm" onclick="removeFriend(${f.id})">删除</button></div>`});document.getElementById('friendList').innerHTML=h}}catch(e){showToast('加载失败','error')}}
+async function searchAndAddFriend(){const q=document.getElementById('friendSearchInput').value.trim();if(!q){showToast('请输入用户名','warning');return}try{const r=await fetch('/api/users/search?q='+encodeURIComponent(q)),d=await r.json();if(Array.isArray(d)&&d.length>0){let h='<div style="margin:12px 0;font-size:13px;color:var(--text-secondary)">搜索结果：</div>';d.forEach(u=>{h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px;margin-bottom:4px;border-radius:8px;background:var(--bg)"><div style="font-weight:600;color:var(--primary);font-size:14px">'+u.username+'</div><div style="font-size:12px;color:var(--text-secondary)">'+(u.name||'')+' '+(u.department?'· '+u.department:'')+'</div><button class="btn btn-blue btn-sm" onclick="addFriend(\x27'+u.username+'\x27)">添加</button></div>'});document.getElementById('friendSearchResults').innerHTML=h}else{document.getElementById('friendSearchResults').innerHTML='<div style="margin:12px 0;font-size:13px;color:var(--text-secondary)">未找到用户</div>'}}catch(e){}}
+async function addFriend(username){try{const r=await fetch('/api/friends/add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username})}),d=await r.json();if(d.success){showToast('好友添加成功','success');document.getElementById('friendSearchResults').innerHTML='';document.getElementById('friendSearchInput').value='';loadFriends()}else showToast(d.message||'添加失败','error')}catch(e){showToast('添加失败','error')}}
+async function removeFriend(friendId){if(!confirm('确定删除该好友？'))return;try{const r=await fetch(`/api/friends/${friendId}`,{method:'DELETE'}),d=await r.json();if(d.success){showToast('好友已删除','success');loadFriends()}else showToast(d.message||'删除失败','error')}catch(e){showToast('删除失败','error')}}
+
+// ==================== 管理员博客管理 ====================
+let adminBlogPage=1, adminBlogFilter='all';
+async function renderAdminBlogs(){
+    document.getElementById('adminContent').innerHTML=`<div class="panel"><div class="panel-toolbar"><h2>📝 博客管理</h2><div style="display:flex;gap:8px"><select id="blogStatusFilter" onchange="adminBlogFilter=this.value;loadAdminBlogs()" style="padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg)"><option value="all">全部</option><option value="pending">待审核</option><option value="published">已发布</option><option value="rejected">已拒绝</option></select><input type="text" id="blogSearchInput" placeholder="搜索标题或作者..." style="padding:6px 10px;border-radius:6px;border:1px solid var(--border);width:200px" onkeydown="if(event.key==='Enter')loadAdminBlogs()"><button class="btn btn-gray btn-sm" onclick="loadAdminBlogs()">搜索</button></div></div><div class="table-wrap"><table><thead><tr><th>ID</th><th>标题</th><th>作者</th><th>状态</th><th>点赞</th><th>评论</th><th>浏览</th><th>时间</th><th>操作</th></tr></thead><tbody id="adminBlogTableBody"><tr><td colspan="9"><div class="loading-text">加载中...</div></td></tr></tbody></table></div><div class="pager" id="adminBlogPager"></div></div>`;loadAdminBlogs();}
+async function loadAdminBlogs(page=1){adminBlogPage=page;try{const filter=document.getElementById('blogStatusFilter')?.value||adminBlogFilter;const search=document.getElementById('blogSearchInput')?.value||'';const url=new URL('/api/admin/blogs',window.location.origin);url.searchParams.set('page',page);url.searchParams.set('per_page',10);url.searchParams.set('status',filter);url.searchParams.set('q',search);const r=await fetch(url),d=await r.json();if(d.error)return;let h='';if(d.blogs&&d.blogs.length>0){d.blogs.forEach(b=>{const statusBadge=b.status==='pending'?'<span class="badge badge-yellow">待审核</span>':b.status==='published'?'<span class="badge badge-green">已发布</span>':'<span class="badge badge-red">已拒绝</span>';const actions=b.status==='pending'?`<button class="btn btn-green btn-sm" onclick="adminApproveBlog(${b.id})">通过</button><button class="btn btn-red btn-sm" onclick="adminRejectBlog(${b.id})">拒绝</button><button class="btn btn-blue btn-sm" onclick="viewBlog(${b.id})">查看</button>`:`<button class="btn btn-blue btn-sm" onclick="viewBlog(${b.id})">查看</button><button class="btn btn-red btn-sm" onclick="adminDelBlog(${b.id})">删除</button>`;h+=`<tr><td style="font-weight:600">${b.id}</td><td style="font-weight:600;color:var(--primary);cursor:pointer" onclick="viewBlog(${b.id})">${b.title}</td><td>${b.username}</td><td>${statusBadge}</td><td>❤️ ${b.likes||0}</td><td>💬 ${b.comment_count||0}</td><td>👁 ${b.views||0}</td><td style="color:var(--text-secondary);font-size:12px">${b.created_at?b.created_at.split(' ')[0]:''}</td><td><div class="action-btns">${actions}</div></td></tr>`})}else h='<tr><td colspan="9"><div class="empty-text">暂无博客</div></td></tr>';document.getElementById('adminBlogTableBody').innerHTML=h;let ph='';if(d.total_pages>1){for(let i=1;i<=d.total_pages;i++)ph+=`<button onclick="loadAdminBlogs(${i})" ${i===page?'disabled':''}>${i}</button>`;document.getElementById('adminBlogPager').innerHTML=ph}}catch(e){showToast('加载失败','error')}}
+async function adminApproveBlog(id){try{const r=await fetch(`/api/admin/blogs/${id}/approve`,{method:'POST'}),d=await r.json();if(d.success){showToast('审核通过','success');loadAdminBlogs(adminBlogPage)}else showToast(d.message||'审核失败','error')}catch(e){showToast('审核失败','error')}}
+async function adminRejectBlog(id){try{const r=await fetch(`/api/admin/blogs/${id}/reject`,{method:'POST'}),d=await r.json();if(d.success){showToast('已拒绝','success');loadAdminBlogs(adminBlogPage)}else showToast(d.message||'操作失败','error')}catch(e){showToast('操作失败','error')}}
+async function adminDelBlog(id){if(!confirm('确定删除该博客？此操作不可恢复！'))return;try{const r=await fetch(`/api/blogs/${id}`,{method:'DELETE'}),d=await r.json();if(d.success){showToast('删除成功','success');loadAdminBlogs(adminBlogPage)}else showToast(d.message||'删除失败','error')}catch(e){showToast('删除失败','error')}}
+
+// ==================== 修改密码 ====================
+function renderUserChangePassword(){
+    document.getElementById('userContent').innerHTML=`
+        <div class="panel"><div class="panel-toolbar"><h2>🔒 修改密码</h2></div>
+        <div style="padding:24px;max-width:420px">
+            <div class="form-group"><label>原密码</label><input type="password" id="oldPassword" placeholder="请输入原密码"></div>
+            <div class="form-group"><label>新密码</label><input type="password" id="newPassword" placeholder="至少6位"></div>
+            <div class="form-group"><label>确认新密码</label><input type="password" id="confirmPassword" placeholder="再次输入新密码"></div>
+            <button class="btn btn-blue" onclick="userDoChangePassword()" style="width:100%">🔒 修改密码</button>
+        </div></div>`;
+}
+async function userDoChangePassword(){
+    const oldPw=document.getElementById('oldPassword').value,newPw=document.getElementById('newPassword').value,confirmPw=document.getElementById('confirmPassword').value;
+    if(!oldPw||!newPw){showToast('请填写完整','warning');return}
+    if(newPw!==confirmPw){showToast('两次新密码不一致','warning');return}
+    if(newPw.length<6){showToast('新密码至少6位','warning');return}
+    try{const r=await fetch('/api/user/change_password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({old_password:oldPw,new_password:newPw})}),d=await r.json();if(d.success){showToast('密码修改成功','success');document.getElementById('oldPassword').value='';document.getElementById('newPassword').value='';document.getElementById('confirmPassword').value=''}else showToast(d.message||'修改失败','error')}catch(e){showToast('修改失败','error')}}
+</script>
+</body>
+</html>
