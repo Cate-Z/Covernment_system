@@ -1,20 +1,15 @@
-# 本地部署指南
+# 部署说明
+
+当前版本的部署方式是 **Docker**：一键部署包在 `deploy/package/`，应用代码在 `final-project/flask-app/`。
+
+> Kubernetes / Helm 相关清单属于 v1 版本，已归档在 `v1-legacy/`（`v1-legacy/helm/`、`v1-legacy/k8s/`）。
 
 ## 目录结构
 
 ```
 deploy/
-├── helm/                      # Helm Chart 配置
-│   ├── Chart.yaml             # Chart 元数据
-│   ├── values.yaml            # 配置值
-│   └── templates/
-│       └── deployment.yaml    # 部署模板
-├── kubernetes/                # Kubernetes 配置
-│   └── mysql-deployment.yaml  # MySQL 部署配置
-├── mysql/                     # 数据库配置
-│   └── init.sql               # 初始化脚本
-└── package/                   # 部署脚本与说明书
-    ├── setup.sh               # 一键部署脚本
+└── package/                   # 部署包
+    ├── setup.sh               # 一键部署脚本（Docker）
     └── deployment-guide.md    # 完整部署说明书
 ```
 
@@ -63,6 +58,13 @@ docker-compose down
 
 ## 📁 文件说明
 
+### deploy/package/setup.sh
+一键部署脚本。在 openEuler / CentOS 虚拟机上自动完成：安装 Docker、配置镜像加速、
+修复 firewalld 与 Docker 兼容性、拉取 MySQL 镜像、构建 Flask 镜像、启动容器、设置开机自启。
+
+### deploy/package/deployment-guide.md
+完整部署说明书，含手动分步部署、日常运维、常见问题排查。
+
 ### final-project/flask-app/Dockerfile
 Flask应用的Docker镜像构建配置
 
@@ -78,20 +80,7 @@ Flask应用主文件，提供REST API接口
 Python依赖包列表
 
 ### final-project/flask-app/init.sql
-MySQL数据库初始化脚本
-
-### deploy/helm/
-Helm Chart配置，用于Kubernetes部署
-
-### deploy/kubernetes/mysql-deployment.yaml
-MySQL的Kubernetes StatefulSet部署配置
-
-### deploy/mysql/init.sql
-数据库初始化脚本（与 flask-app 共享）
-
-### deploy/package/
-一键部署脚本（`setup.sh`）与完整部署说明书（`deployment-guide.md`），
-用于在 openEuler / CentOS 虚拟机上通过 Docker 快速部署。
+MySQL数据库初始化脚本（16 张业务表）
 
 ## ⚠️ 注意事项
 
