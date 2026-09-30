@@ -157,7 +157,7 @@
 
 ### 一键部署命令
 ```bash
-cd ~/project/项目部署包
+cd ~/project/deploy-package
 chmod +x setup.sh
 sudo ./setup.sh
 ```
@@ -211,7 +211,7 @@ docker restart gov-portal-flask  # 重启服务
 
 **演讲时长**：约20分钟  
 **演示重点**：核心功能演示、技术架构、部署便捷性  
-**备用内容**：常见问题解答.md（应对提问）
+**备用内容**：faq.md（应对提问）
 
 ---
 

@@ -21,18 +21,18 @@
 
 ### 1.2 准备部署包
 
-将 `项目部署包` 文件夹完整上传到虚拟机：
+将 `deploy-package` 文件夹完整上传到虚拟机（该部署包由仓库中的 `deploy/package/`（`setup.sh` + 本说明书）与 `final-project/flask-app/`（应用代码）组装而成）：
 
 ```bash
 # 在宿主机 PowerShell 中执行（替换 IP 和路径）
-scp -r "项目部署包" os@虚拟机IP:~/project/
+scp -r "deploy-package" os@虚拟机IP:~/project/
 ```
 
 **部署包目录结构：**
 ```
-项目部署包/
+deploy-package/
 ├── setup.sh                ← 一键部署脚本
-├── 部署说明书.md            ← 本文档
+├── deployment-guide.md     ← 本文档
 └── flask-app/              ← 项目完整代码
     ├── app.py              ← Flask 主程序
     ├── Dockerfile           ← 容器镜像构建文件
@@ -55,7 +55,7 @@ scp -r "项目部署包" os@虚拟机IP:~/project/
 
 ```bash
 # 进入部署包目录
-cd ~/project/项目部署包
+cd ~/project/deploy-package
 
 # 给脚本执行权限
 chmod +x setup.sh
@@ -130,7 +130,7 @@ sudo firewall-cmd --reload
 sudo docker pull mysql:8.0.35
 
 # 进入项目目录构建 Flask
-cd ~/project/项目部署包/flask-app
+cd ~/project/deploy-package/flask-app
 sudo docker build -t gov-portal-flask .
 ```
 
@@ -152,7 +152,7 @@ sudo docker run -d \
   -e MYSQL_ROOT_PASSWORD=trae123 \
   -e MYSQL_DATABASE=example_db \
   -v mysql_data:/var/lib/mysql \
-  -v ~/project/项目部署包/flask-app/init.sql:/docker-entrypoint-initdb.d/init.sql \
+  -v ~/project/deploy-package/flask-app/init.sql:/docker-entrypoint-initdb.d/init.sql \
   -p 3308:3306 \
   --restart unless-stopped \
   mysql:8.0.35
@@ -275,10 +275,10 @@ docker logs -f gov-portal-mysql
 
 ```bash
 # 在宿主机 PowerShell 中执行
-scp -r "flask-app\." os@虚拟机IP:~/project/项目部署包/flask-app/
+scp -r "flask-app\." os@虚拟机IP:~/project/deploy-package/flask-app/
 
 # 在虚拟机中重建并重启
-cd ~/project/项目部署包/flask-app
+cd ~/project/deploy-package/flask-app
 sudo docker build -t gov-portal-flask .
 sudo docker stop gov-portal-flask && sudo docker rm gov-portal-flask
 sudo docker run -d \

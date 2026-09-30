@@ -104,9 +104,9 @@
 ## 八、项目文件结构
 
 ```
-部署包/
+deploy-package/
 ├── setup.sh              # 一键部署脚本
-├── 部署说明书.md          # 详细部署指南
+├── deployment-guide.md   # 详细部署指南
 └── flask-app/
     ├── app.py            # Flask主程序
     ├── Dockerfile        # 容器构建文件

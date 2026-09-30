@@ -66,7 +66,16 @@ echo -e "${GREEN}  MySQL 镜像拉取完成${NC}"
 # ---- 5. 构建 Flask 镜像 ----
 echo -e "${YELLOW}[5/7] 构建 Flask 应用镜像...${NC}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-cd "$SCRIPT_DIR/flask-app"
+
+# 应用代码目录：优先使用与本脚本同级的 flask-app/（打包后的部署包结构），
+# 若不存在则回退到仓库中的 final-project/flask-app/
+if [ -d "$SCRIPT_DIR/flask-app" ]; then
+    APP_DIR="$SCRIPT_DIR/flask-app"
+else
+    APP_DIR="$(cd "$SCRIPT_DIR/../../final-project/flask-app" && pwd)"
+fi
+echo -e "${GREEN}  应用代码目录: ${APP_DIR}${NC}"
+cd "$APP_DIR"
 docker build -t gov-portal-flask .
 echo -e "${GREEN}  Flask 镜像构建完成${NC}"
 
@@ -88,7 +97,7 @@ docker run -d \
   -e MYSQL_ROOT_PASSWORD=trae123 \
   -e MYSQL_DATABASE=example_db \
   -v mysql_data:/var/lib/mysql \
-  -v "$SCRIPT_DIR/flask-app/init.sql:/docker-entrypoint-initdb.d/init.sql" \
+  -v "$APP_DIR/init.sql:/docker-entrypoint-initdb.d/init.sql" \
   -p 3308:3306 \
   --restart unless-stopped \
   mysql:8.0.35
