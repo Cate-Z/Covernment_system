@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 from flask import Flask, jsonify, request, render_template, session, g, has_request_context
 from werkzeug.exceptions import HTTPException
-import mysql.connector
+import psycopg2
+from psycopg2.extras import RealDictCursor
 import os
 import time
 import traceback
+from urllib.parse import urlparse
 from datetime import datetime
 from decimal import Decimal
 import sys
@@ -16,15 +18,30 @@ app = Flask(__name__, static_folder='static', template_folder='templates')
 app.secret_key = 'kunpeng-cloud-training-secret-key-2024'
 app.config['JSON_AS_ASCII'] = False
 
-# MySQL配置
-mysql_host = os.environ.get('MYSQL_HOST', 'mysql')
-mysql_user = os.environ.get('MYSQL_USER', 'root')
-mysql_password = os.environ.get('MYSQL_PASSWORD', 'trae123')
-mysql_db = os.environ.get('MYSQL_DB', 'example_db')
+# PostgreSQL 配置（Supabase）
+# Render 上只需配置 DATABASE_URL = Supabase 的 Connection string（URI / Session pooler 均可）
+DATABASE_URL = (os.environ.get('DATABASE_URL')
+                or os.environ.get('POSTGRES_URL')
+                or os.environ.get('SUPABASE_DATABASE_URL')
+                or '').strip()
+# 未配置 URL 时的分散式回退（本地调试用）
+pg_host = os.environ.get('PG_HOST', 'localhost')
+pg_port = os.environ.get('PG_PORT', '5432')
+pg_user = os.environ.get('PG_USER', 'postgres')
+pg_password = os.environ.get('PG_PASSWORD', '')
+pg_db = os.environ.get('PG_DB', 'postgres')
 
 # 管理员账号密码
 ADMIN_USERNAME = 'admin'
 ADMIN_PASSWORD = 'admin123'
+
+# 备份/恢复涉及的表，顺序按外键依赖排列（父表在前）
+BACKUP_TABLES = [
+    'users', 'roles', 'permissions', 'role_permissions', 'departments',
+    'news', 'services', 'feedback', 'announcements', 'blogs',
+    'blog_comments', 'blog_likes', 'friends', 'operation_logs',
+    'system_config', 'backup_records',
+]
 
 # 操作日志
 operation_logs = []
@@ -72,8 +89,8 @@ def is_database_error(exc):
         return False
     module = type(exc).__module__ or ''
     name = type(exc).__name__
-    # 覆盖 mysql.connector 与 psycopg/psycopg2(Postgres) 的驱动异常基类
-    if 'mysql.connector' in module or 'psycopg' in module:
+    # 覆盖 psycopg2(Postgres/Supabase) 等驱动的异常基类，休眠/断连均判为数据库故障
+    if 'psycopg' in module:
         return True
     if name in ('OperationalError', 'InterfaceError', 'DatabaseError',
                 'PoolError', 'InternalError'):
@@ -87,6 +104,15 @@ def _set_db_down(flag=True):
     try:
         if has_request_context():
             g.db_down = flag
+    except Exception:
+        pass
+
+
+def _set_db_ok():
+    """标记本次请求至少成功连接过一次数据库。"""
+    try:
+        if has_request_context():
+            g.db_ok = True
     except Exception:
         pass
 
@@ -111,20 +137,96 @@ def db_outage_response():
     return resp
 
 
-def get_mysql_connection():
+def _pg_sslmode():
+    """Supabase 强制要求 SSL；本地直连则关闭。"""
+    host = pg_host
+    if DATABASE_URL:
+        try:
+            host = urlparse(DATABASE_URL).hostname or pg_host
+        except Exception:
+            pass
+    return 'disable' if host in ('localhost', '127.0.0.1', '::1') else 'require'
+
+
+class PgCursor:
+    """把 psycopg2 游标包装成 mysql-connector 的使用习惯，业务代码无需改动：
+       - dictionary=True 时行以 dict 返回
+       - lastrowid 返回最近一次 INSERT 的自增主键
+       其余属性（rowcount / description 等）自动转发给底层游标。
+    """
+    def __init__(self, raw_cursor):
+        self._raw = raw_cursor
+
+    def execute(self, query, params=None):
+        self._raw.execute(query, params)
+        return self
+
+    def executemany(self, query, params):
+        return self._raw.executemany(query, params)
+
+    def fetchall(self):
+        return list(self._raw.fetchall())
+
+    def fetchone(self):
+        return self._raw.fetchone()
+
+    def fetchmany(self, size=None):
+        return self._raw.fetchmany(size) if size else self._raw.fetchmany()
+
+    def close(self):
+        self._raw.close()
+
+    @property
+    def lastrowid(self):
+        try:
+            # 独立游标，避免受 dictionary 游标的行结构影响
+            probe = self._raw.connection.cursor()
+            probe.execute('SELECT lastval()')
+            row = probe.fetchone()
+            probe.close()
+            return row[0] if row else None
+        except Exception:
+            return None
+
+    def __getattr__(self, name):
+        return getattr(self._raw, name)
+
+
+class PgConnection:
+    """psycopg2 连接包装：cursor(dictionary=True) 兼容 MySQL 写法。"""
+    def __init__(self, raw_conn):
+        self._raw = raw_conn
+
+    def cursor(self, dictionary=False):
+        factory = RealDictCursor if dictionary else None
+        return PgCursor(self._raw.cursor(cursor_factory=factory))
+
+    def commit(self):
+        self._raw.commit()
+
+    def rollback(self):
+        self._raw.rollback()
+
+    def close(self):
+        self._raw.close()
+
+    def __getattr__(self, name):
+        return getattr(self._raw, name)
+
+
+def get_db_connection():
     """获取数据库连接；失败时打标记并抛出原始异常（保持调用方行为不变）。"""
+    kwargs = {'connect_timeout': DB_CONNECT_TIMEOUT, 'sslmode': _pg_sslmode()}
     last_error = None
     for attempt in range(DB_CONNECT_RETRIES + 1):
         try:
-            return mysql.connector.connect(
-                host=mysql_host,
-                user=mysql_user,
-                password=mysql_password,
-                database=mysql_db,
-                charset='utf8mb4',
-                collation='utf8mb4_unicode_ci',
-                connection_timeout=DB_CONNECT_TIMEOUT
-            )
+            if DATABASE_URL:
+                conn = psycopg2.connect(DATABASE_URL, **kwargs)
+            else:
+                conn = psycopg2.connect(host=pg_host, port=pg_port, user=pg_user,
+                                        password=pg_password, dbname=pg_db, **kwargs)
+            _set_db_ok()
+            return PgConnection(conn)
         except Exception as e:
             last_error = e
             if attempt < DB_CONNECT_RETRIES:
@@ -133,6 +235,10 @@ def get_mysql_connection():
                 time.sleep(DB_RETRY_DELAY)
     _set_db_down()
     raise last_error
+
+
+# 兼容既有 ~120 处调用点
+get_mysql_connection = get_db_connection
 
 def log_action(action, details):
     user = session.get('username', 'anonymous')
@@ -152,7 +258,8 @@ def log_action(action, details):
         conn = get_mysql_connection()
         cursor = conn.cursor()
         cursor.execute(
-            'INSERT INTO operation_logs (user, action, details, ip_address, user_agent) VALUES (%s, %s, %s, %s, %s)',
+            # user 是 PostgreSQL 保留字，必须加双引号
+            'INSERT INTO operation_logs ("user", action, details, ip_address, user_agent) VALUES (%s, %s, %s, %s, %s)',
             (user, action, details, ip_address, user_agent)
         )
         conn.commit()
@@ -780,7 +887,7 @@ def add_department():
         conn.close()
         log_action('ADD_DEPT', f'Added department: {name}')
         return jsonify({'success': True, 'message': '部门添加成功', 'id': dept_id}), 201
-    except mysql.connector.IntegrityError:
+    except psycopg2.IntegrityError:
         return jsonify({'success': False, 'message': '部门名称已存在'}), 400
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
@@ -802,7 +909,7 @@ def update_department(dept_id):
         conn.close()
         log_action('EDIT_DEPT', f'Updated department ID: {dept_id}')
         return jsonify({'success': True, 'message': '部门更新成功'})
-    except mysql.connector.IntegrityError:
+    except psycopg2.IntegrityError:
         return jsonify({'success': False, 'message': '部门名称已存在'}), 400
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
@@ -872,7 +979,7 @@ def import_template():
         if 'departments' in data:
             for dept_name in data['departments']:
                 try:
-                    cursor.execute('INSERT IGNORE INTO departments (name) VALUES (%s)', (dept_name,))
+                    cursor.execute('INSERT INTO departments (name) VALUES (%s) ON CONFLICT DO NOTHING', (dept_name,))
                 except Exception:
                     pass
         
@@ -880,7 +987,7 @@ def import_template():
             for service in data['services']:
                 try:
                     cursor.execute(
-                        'INSERT IGNORE INTO services (name, description, type, icon, sort_order) VALUES (%s, %s, %s, %s, %s)',
+                        'INSERT INTO services (name, description, type, icon, sort_order) VALUES (%s, %s, %s, %s, %s) ON CONFLICT DO NOTHING',
                         (service.get('name'), service.get('description', ''), service.get('type', '其他'), 
                          service.get('icon', '📋'), service.get('sort_order', 999))
                     )
@@ -910,7 +1017,7 @@ def reset_demo_data():
         
         demo_depts = ['技术部', '财务部', '人事部', '市场部', '运营部', '行政部']
         for dept in demo_depts:
-            cursor.execute('INSERT IGNORE INTO departments (name) VALUES (%s)', (dept,))
+            cursor.execute('INSERT INTO departments (name) VALUES (%s) ON CONFLICT DO NOTHING', (dept,))
         
         demo_services = [
             ('企业开办', '一站式企业注册服务，包含工商注册、税务登记、社保开户等', '企业开办', '🏢', 1),
@@ -922,7 +1029,7 @@ def reset_demo_data():
         ]
         for service in demo_services:
             cursor.execute(
-                'INSERT IGNORE INTO services (name, description, type, icon, sort_order) VALUES (%s, %s, %s, %s, %s)',
+                'INSERT INTO services (name, description, type, icon, sort_order) VALUES (%s, %s, %s, %s, %s) ON CONFLICT DO NOTHING',
                 service
             )
         
@@ -988,7 +1095,7 @@ def create_role():
         
         log_action('CREATE_ROLE', f'Created role: {name}')
         return jsonify({'success': True, 'message': '角色创建成功', 'id': role_id})
-    except mysql.connector.IntegrityError:
+    except psycopg2.IntegrityError:
         return jsonify({'success': False, 'message': '角色名称已存在'}), 400
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
@@ -1116,7 +1223,7 @@ def get_department_stats():
         cursor.execute('''
             SELECT department, COUNT(*) as count 
             FROM users 
-            WHERE department IS NOT NULL AND department != "" 
+            WHERE department IS NOT NULL AND department != '' 
             GROUP BY department 
             ORDER BY count DESC
         ''')
@@ -1135,10 +1242,10 @@ def get_monthly_stats():
         conn = get_mysql_connection()
         cursor = conn.cursor(dictionary=True)
         cursor.execute('''
-            SELECT DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as count 
+            SELECT to_char(created_at, 'YYYY-MM') as month, COUNT(*) as count 
             FROM users 
             WHERE created_at IS NOT NULL 
-            GROUP BY DATE_FORMAT(created_at, '%Y-%m') 
+            GROUP BY to_char(created_at, 'YYYY-MM') 
             ORDER BY month DESC 
             LIMIT 12
         ''')
@@ -1196,10 +1303,10 @@ def get_stats():
         cursor.execute('SELECT COUNT(*) FROM users')
         total = cursor.fetchone()[0]
         
-        cursor.execute('SELECT COUNT(*) FROM users WHERE status = "active"')
+        cursor.execute("SELECT COUNT(*) FROM users WHERE status = 'active'")
         active = cursor.fetchone()[0]
         
-        cursor.execute('SELECT COUNT(*) FROM users WHERE status = "inactive"')
+        cursor.execute("SELECT COUNT(*) FROM users WHERE status = 'inactive'")
         inactive = cursor.fetchone()[0]
         
         today = datetime.now().strftime('%Y-%m-%d')
@@ -1260,35 +1367,43 @@ def create_backup():
     if 'username' not in session or session.get('role') != 'admin':
         return jsonify({'error': '未授权'}), 401
     try:
-        import subprocess
+        import json
         import os
         
         backup_dir = '/tmp/backups'
         os.makedirs(backup_dir, exist_ok=True)
         
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        backup_file = f'{backup_dir}/backup_{timestamp}.sql'
+        backup_file = f'{backup_dir}/backup_{timestamp}.json'
         
-        cmd = f"mysqldump -h mysql -u root -ptrae123 example_db > {backup_file}"
-        result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+        # Supabase 环境下没有 mysqldump/pg_dump，改为纯 Python 导出全表 JSON
+        conn = get_mysql_connection()
+        cursor = conn.cursor(dictionary=True)
+        dump = {}
+        for table in BACKUP_TABLES:
+            try:
+                cursor.execute(f'SELECT * FROM {table}')
+                dump[table] = cursor.fetchall()
+            except Exception as te:
+                dump[table] = []
+                print(f"[BACKUP] 跳过表 {table}: {te}")
+        cursor.close()
         
-        if result.returncode == 0:
-            file_size = os.path.getsize(backup_file)
-            
-            conn = get_mysql_connection()
-            cursor = conn.cursor()
-            cursor.execute(
-                'INSERT INTO backup_records (backup_type, file_path, file_size) VALUES (%s, %s, %s)',
-                ('full', backup_file, file_size)
-            )
-            conn.commit()
-            cursor.close()
-            conn.close()
-            
-            log_action('BACKUP', f'Created backup: {backup_file} ({file_size} bytes)')
-            return jsonify({'success': True, 'message': '备份成功', 'file_path': backup_file, 'file_size': file_size})
-        else:
-            return jsonify({'success': False, 'message': f'备份失败: {result.stderr}'})
+        with open(backup_file, 'w', encoding='utf-8') as f:
+            json.dump(dump, f, ensure_ascii=False, default=str, indent=2)
+        
+        file_size = os.path.getsize(backup_file)
+        cursor = conn.cursor()
+        cursor.execute(
+            'INSERT INTO backup_records (backup_type, file_path, file_size) VALUES (%s, %s, %s)',
+            ('full', backup_file, file_size)
+        )
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        log_action('BACKUP', f'Created backup: {backup_file} ({file_size} bytes)')
+        return jsonify({'success': True, 'message': '备份成功', 'file_path': backup_file, 'file_size': file_size})
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
 
@@ -1317,20 +1432,45 @@ def restore_backup(backup_id):
         cursor.execute('SELECT file_path FROM backup_records WHERE id = %s', (backup_id,))
         backup = cursor.fetchone()
         cursor.close()
-        conn.close()
         
         if not backup:
+            conn.close()
             return jsonify({'success': False, 'message': '备份文件不存在'}), 404
         
-        import subprocess
-        cmd = f"mysql -h mysql -u root -ptrae123 example_db < {backup['file_path']}"
-        result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+        import json
+        import os
         
-        if result.returncode == 0:
-            log_action('RESTORE', f'Restored from backup: {backup["file_path"]}')
-            return jsonify({'success': True, 'message': '恢复成功'})
-        else:
-            return jsonify({'success': False, 'message': f'恢复失败: {result.stderr}'})
+        file_path = backup['file_path']
+        if not os.path.exists(file_path):
+            conn.close()
+            return jsonify({'success': False, 'message': '备份文件已丢失（运行环境为临时存储）'}), 404
+        
+        with open(file_path, 'r', encoding='utf-8') as f:
+            dump = json.load(f)
+        
+        # 按外键依赖顺序回填，冲突行跳过
+        restored_rows = 0
+        cursor = conn.cursor()
+        for table in BACKUP_TABLES:
+            rows = dump.get(table) or []
+            if not rows or not isinstance(rows, list):
+                continue
+            columns = list(rows[0].keys())
+            placeholders = ', '.join(['%s'] * len(columns))
+            column_def = ', '.join(f'"{c}"' for c in columns)
+            sql = f'INSERT INTO {table} ({column_def}) VALUES ({placeholders}) ON CONFLICT DO NOTHING'
+            for row in rows:
+                try:
+                    cursor.execute(sql, tuple(row.get(c) for c in columns))
+                    restored_rows += 1
+                except Exception:
+                    continue
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        log_action('RESTORE', f'Restored from backup: {file_path}')
+        return jsonify({'success': True, 'message': f'恢复完成，共写入 {restored_rows} 条记录'})
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
 
@@ -1438,7 +1578,7 @@ def search_audit_logs():
             query += ' AND action = %s'
             params.append(action)
         if user:
-            query += ' AND user LIKE %s'
+            query += ' AND "user" LIKE %s'
             params.append(f'%{user}%')
         
         query += ' ORDER BY created_at DESC'
@@ -1503,7 +1643,7 @@ def get_news():
         conn = get_mysql_connection()
         cursor = conn.cursor(dictionary=True)
         
-        count_query = 'SELECT COUNT(*) as total FROM news WHERE status = "published"'
+        count_query = "SELECT COUNT(*) as total FROM news WHERE status = 'published'"
         count_params = []
         
         if category:
@@ -1518,7 +1658,7 @@ def get_news():
         cursor.execute(count_query, count_params)
         total = cursor.fetchone()['total']
         
-        query = 'SELECT * FROM news WHERE status = "published"'
+        query = "SELECT * FROM news WHERE status = 'published'"
         params = []
         
         if category:
@@ -1845,7 +1985,7 @@ def get_gov_stats():
         cursor = conn.cursor()
         
         # 新闻统计
-        cursor.execute('SELECT COUNT(*) FROM news WHERE status = "published"')
+        cursor.execute("SELECT COUNT(*) FROM news WHERE status = 'published'")
         news_count = cursor.fetchone()[0]
         
         cursor.execute('SELECT COUNT(*) FROM news WHERE DATE(publish_time) = CURDATE()')
@@ -1859,10 +1999,10 @@ def get_gov_stats():
         cursor.execute('SELECT COUNT(*) FROM feedback')
         feedback_count = cursor.fetchone()[0]
         
-        cursor.execute('SELECT COUNT(*) FROM feedback WHERE status = "pending"')
+        cursor.execute("SELECT COUNT(*) FROM feedback WHERE status = 'pending'")
         feedback_pending = cursor.fetchone()[0]
         
-        cursor.execute('SELECT COUNT(*) FROM feedback WHERE status = "processed"')
+        cursor.execute("SELECT COUNT(*) FROM feedback WHERE status = 'processed'")
         feedback_processed = cursor.fetchone()[0]
         
         # 用户统计
@@ -1873,7 +2013,7 @@ def get_gov_stats():
         cursor.execute('''
             SELECT category, COUNT(*) as count 
             FROM news 
-            WHERE status = "published"
+            WHERE status = 'published'
             GROUP BY category
         ''')
         news_category_stats = []
@@ -1945,7 +2085,11 @@ def get_system_info():
     try:
         conn = get_mysql_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT TABLE_NAME as table_name, TABLE_ROWS as table_rows FROM information_schema.tables WHERE table_schema = %s", (mysql_db,))
+        # Postgres 版：改用 pg_stat_user_tables 读取表名与行数估算
+        cursor.execute(
+            "SELECT relname AS table_name, n_live_tup AS table_rows "
+            "FROM pg_stat_user_tables WHERE schemaname = 'public' ORDER BY relname"
+        )
         tables = cursor.fetchall()
         cursor.execute("SELECT COUNT(*) as count FROM users")
         user_count = cursor.fetchone()['count']
@@ -2433,24 +2577,15 @@ def upload_image():
 
 # ==================== 全局兜底：数据库异常不再返回 500 ====================
 
-def _response_looks_db_error(resp):
-    """判断 500 响应的内容是否是数据库错误（避免误伤其他原因的 500）。"""
-    if resp.is_json:
-        data = resp.get_json(silent=True)
-        if isinstance(data, dict):
-            text = ' '.join(str(data.get(k, '')) for k in ('error', 'message', 'msg')).lower()
-            return any(key in text for key in _DB_ERROR_KEYWORDS)
-    # HTML 500 崩溃页：只要本次请求出现过连接失败即视为数据库问题
-    return True
-
-
 @app.after_request
 def degrade_db_outage(resp):
     """任一路由因数据库休眠而返回 500 时，统一降级为 503 + 友好提示。
-    等价给所有读写路由加了 try-except，但不必改动各路由内的业务代码。"""
+    等价给所有读写路由加了 try-except，但不必改动各路由内的业务代码。
+    判定规则：本次请求出现过连接失败、且从未成功连上过数据库，
+    此时任何 500 的根因基本都可以认定为数据库不可用。"""
     try:
         if has_request_context() and getattr(g, 'db_down', False) \
-                and resp.status_code >= 500 and _response_looks_db_error(resp):
+                and not getattr(g, 'db_ok', False) and resp.status_code >= 500:
             return db_outage_response()
     except Exception as e:
         print(f"[AFTER_REQUEST] 兜底处理异常: {e}")
@@ -2471,4 +2606,8 @@ def handle_unexpected_error(e):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    # Render（以及大多数 PaaS）会通过 PORT 环境变量指定监听端口，必须读取而非写死。
+    # debug 线上必须关闭：Werkzeug 调试器会暴露交互式控制台，存在严重安全风险。
+    app.run(host='0.0.0.0',
+            port=int(os.environ.get('PORT', 5000)),
+            debug=os.environ.get('FLASK_DEBUG', 'false').lower() == 'true')

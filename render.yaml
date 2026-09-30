@@ -1,0 +1,29 @@
+# Render Blueprint —— 政务数字门户平台
+# 使用方式：Render Dashboard → New → Blueprint → 选中本仓库 → Apply
+# Render 会自动读取本文件创建 Web Service，无需手工填写构建/启动命令。
+services:
+  - type: web
+    name: gov-portal
+    runtime: python
+    # 新加坡区域，国内访问速度相对较好
+    region: singapore
+    plan: free
+    # 应用代码在仓库子目录中，必须指定根目录
+    rootDir: final-project/flask-app
+    buildCommand: pip install -r requirements.txt
+    # 生产环境用 gunicorn 启动；$PORT 由 Render 注入
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --threads 8 --timeout 60
+    # /api/health 不查数据库，避免 Supabase 休眠时被健康检查打挂
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      # Supabase 连接串，含密码，不在配置文件中保存，需在 Dashboard 里填写
+      - key: DATABASE_URL
+        sync: false
+      - key: DB_CONNECT_TIMEOUT
+        value: "8"
+      - key: DB_CONNECT_RETRIES
+        value: "1"
+      - key: DB_RETRY_DELAY
+        value: "2"

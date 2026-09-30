@@ -1,3 +1,5 @@
+# 政务数字门户平台 —— Render 部署依赖
+# 数据库已迁移到 Supabase PostgreSQL，故使用 psycopg2 而非 mysql-connector
 flask==2.3.3
-redis==5.0.1
-mysql-connector-python==8.2.0
+psycopg2-binary==2.9.13
+gunicorn==21.2.0
