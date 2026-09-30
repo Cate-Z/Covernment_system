@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
-from flask import Flask, jsonify, request, render_template, session
+from flask import Flask, jsonify, request, render_template, session, g, has_request_context
+from werkzeug.exceptions import HTTPException
 import mysql.connector
 import os
+import time
+import traceback
 from datetime import datetime
 from decimal import Decimal
 import sys
@@ -33,15 +36,103 @@ NEWS_CATEGORIES = ['政策法规', '政务动态', '通知公告', '办事指南
 SERVICE_TYPES = ['企业开办', '税务办理', '社保服务', '医疗服务', '教育服务', '住房服务']
 FEEDBACK_TYPES = ['咨询', '投诉', '建议', '表扬']
 
+# ==================== 数据库异常兜底（Supabase 免费版休眠） ====================
+# Supabase 免费套餐超过 7 天无访问会自动休眠，首次唤醒期间连接会直接失败。
+# 这里不改任何业务逻辑，只在连接层做「标记 + 友好降级」，
+# 保证页面能正常渲染、接口返回友好提示，而不是抛出 500 崩溃。
+DB_DOWN_ALERT = (
+    '⚠️ 服务器维护提示：数据库服务已休眠，表单提交、数据查询等交互功能暂时不可用。'
+    '页面UI可正常浏览，如需演示完整功能，请稍后重试。'
+)
+
+# 连接超时（秒）：避免 Render 请求被长时间挂住
+DB_CONNECT_TIMEOUT = int(os.environ.get('DB_CONNECT_TIMEOUT', '8'))
+# 首次连接失败后的重试次数（给 Supabase 冷启动留一次机会）
+DB_CONNECT_RETRIES = int(os.environ.get('DB_CONNECT_RETRIES', '1'))
+# 每次重试前的等待（秒）
+DB_RETRY_DELAY = float(os.environ.get('DB_RETRY_DELAY', '2'))
+
+# 判定为「数据库连接层故障」的关键字（同时覆盖 Supabase/Postgres 常见报错）
+_DB_ERROR_KEYWORDS = (
+    "can't connect", "cannot connect", "could not connect", "connection refused",
+    "connection reset", "connection timed out", "timed out", "timeout expired",
+    "server has gone away", "lost connection", "broken pipe", "network is unreachable",
+    "could not translate host", "too many connections", "access denied",
+    "mysql server", "connection to server", "server closed the connection",
+    "terminating connection", "connection is closed", "ssl connection",
+    "password authentication failed", "the database system is",
+)
+
+
+def is_database_error(exc):
+    """判断异常是否属于数据库不可用（休眠 / 连不上 / 超时），而非业务数据错误。"""
+    if exc is None:
+        return False
+    if isinstance(exc, HTTPException):
+        return False
+    module = type(exc).__module__ or ''
+    name = type(exc).__name__
+    # 覆盖 mysql.connector 与 psycopg/psycopg2(Postgres) 的驱动异常基类
+    if 'mysql.connector' in module or 'psycopg' in module:
+        return True
+    if name in ('OperationalError', 'InterfaceError', 'DatabaseError',
+                'PoolError', 'InternalError'):
+        return True
+    msg = str(exc).lower()
+    return any(key in msg for key in _DB_ERROR_KEYWORDS)
+
+
+def _set_db_down(flag=True):
+    """在当前请求上下文里打标记，供 after_request / errorhandler 判断降级。"""
+    try:
+        if has_request_context():
+            g.db_down = flag
+    except Exception:
+        pass
+
+
+def _is_db_down():
+    try:
+        return bool(getattr(g, 'db_down', False)) if has_request_context() else False
+    except Exception:
+        return False
+
+
+def db_outage_response():
+    """数据库不可用时的统一响应：503 + 友好文案（不返回 500）。"""
+    resp = jsonify({
+        'success': False,
+        'error': DB_DOWN_ALERT,
+        'message': DB_DOWN_ALERT,
+        'code': 'DB_UNAVAILABLE',
+        'db_alert': DB_DOWN_ALERT,
+    })
+    resp.status_code = 503
+    return resp
+
+
 def get_mysql_connection():
-    return mysql.connector.connect(
-        host=mysql_host,
-        user=mysql_user,
-        password=mysql_password,
-        database=mysql_db,
-        charset='utf8mb4',
-        collation='utf8mb4_unicode_ci'
-    )
+    """获取数据库连接；失败时打标记并抛出原始异常（保持调用方行为不变）。"""
+    last_error = None
+    for attempt in range(DB_CONNECT_RETRIES + 1):
+        try:
+            return mysql.connector.connect(
+                host=mysql_host,
+                user=mysql_user,
+                password=mysql_password,
+                database=mysql_db,
+                charset='utf8mb4',
+                collation='utf8mb4_unicode_ci',
+                connection_timeout=DB_CONNECT_TIMEOUT
+            )
+        except Exception as e:
+            last_error = e
+            if attempt < DB_CONNECT_RETRIES:
+                print(f"[DB] 连接失败，{DB_RETRY_DELAY}s 后重试 "
+                      f"({attempt + 1}/{DB_CONNECT_RETRIES}): {e}")
+                time.sleep(DB_RETRY_DELAY)
+    _set_db_down()
+    raise last_error
 
 def log_action(action, details):
     user = session.get('username', 'anonymous')
@@ -72,7 +163,32 @@ def log_action(action, details):
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    """首页：数据库正常则查询公告；数据库休眠时公告置空并渲染友好提示，绝不中断页面渲染。"""
+    announcements = []
+    db_alert = None
+    try:
+        conn = get_mysql_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute('SELECT * FROM announcements ORDER BY is_top DESC, created_at DESC LIMIT 10')
+        rows = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        announcements = [
+            {
+                'id': row.get('id'),
+                'title': row.get('title'),
+                'content': row.get('content'),
+                'is_top': row.get('is_top'),
+                'created_at': str(row.get('created_at')) if row.get('created_at') else None,
+            }
+            for row in rows
+        ]
+    except Exception as e:
+        announcements = []
+        if is_database_error(e):
+            db_alert = DB_DOWN_ALERT
+        print(f"[HOME] 公告查询失败，已降级渲染: {e}")
+    return render_template('index.html', announcements=announcements, db_alert=db_alert)
 
 # ==================== 统一登录认证 ====================
 
@@ -2314,6 +2430,45 @@ def upload_image():
         return jsonify({'success': False, 'message': '无效的图片格式'}), 400
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
+
+# ==================== 全局兜底：数据库异常不再返回 500 ====================
+
+def _response_looks_db_error(resp):
+    """判断 500 响应的内容是否是数据库错误（避免误伤其他原因的 500）。"""
+    if resp.is_json:
+        data = resp.get_json(silent=True)
+        if isinstance(data, dict):
+            text = ' '.join(str(data.get(k, '')) for k in ('error', 'message', 'msg')).lower()
+            return any(key in text for key in _DB_ERROR_KEYWORDS)
+    # HTML 500 崩溃页：只要本次请求出现过连接失败即视为数据库问题
+    return True
+
+
+@app.after_request
+def degrade_db_outage(resp):
+    """任一路由因数据库休眠而返回 500 时，统一降级为 503 + 友好提示。
+    等价给所有读写路由加了 try-except，但不必改动各路由内的业务代码。"""
+    try:
+        if has_request_context() and getattr(g, 'db_down', False) \
+                and resp.status_code >= 500 and _response_looks_db_error(resp):
+            return db_outage_response()
+    except Exception as e:
+        print(f"[AFTER_REQUEST] 兜底处理异常: {e}")
+    return resp
+
+
+@app.errorhandler(Exception)
+def handle_unexpected_error(e):
+    """最后一道防线：未捕获的异常也不向用户暴露数据库报错或崩溃页。"""
+    if isinstance(e, HTTPException):
+        return e  # 401/404 等 HTTP 语义保持原样
+    if is_database_error(e) or _is_db_down():
+        print(f"[DB] 请求降级为友好提示: {e}")
+        return db_outage_response()
+    traceback.print_exc()
+    return jsonify({'success': False, 'error': '服务器内部错误',
+                    'message': '服务器内部错误'}), 500
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
